@@ -1,0 +1,340 @@
+{% extends 'web_interface/base.html' %}
+{% load static %}
+
+{% block title %}Sign In - TravelEase{% endblock %}
+{% block meta_description %}Sign in to your TravelEase account to access saved destinations and personalized travel recommendations.{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* .auth-container / .auth-card now live in base.html's shared
+       stylesheet -- this page just uses them. */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    .konami-mode {
+        background: linear-gradient(45deg, #667eea, #764ba2) !important;
+        animation: pulse 2s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container flex items-center justify-center py-12 px-4">
+    <div class="max-w-md w-full auth-card rounded-2xl shadow-xl p-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center mx-auto mb-4 cursor-pointer hover:scale-105 transition-transform" id="logo">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900">Welcome Back</h1>
+            <p class="text-gray-600 mt-2">Sign in to continue your journey</p>
+        </div>
+
+        <!-- Social Login -->
+        <div class="space-y-3 mb-6">
+            <button type="button" id="google-btn" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:shadow-md transition-all duration-200">
+                <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continue with Google
+            </button>
+        </div>
+
+        <div class="relative mb-6">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-4 bg-white text-gray-500">or continue with email</span>
+            </div>
+        </div>
+
+        <!-- Django Login Form -->
+        <form method="post" action="{% url 'accounts:login' %}" id="login-form" class="space-y-6">
+            {% csrf_token %}
+            <!-- FIXED (found during audit): this form had no way to carry
+                 ?next=... through to the POST -- login_view reads
+                 request.GET.get('next') correctly, but that only sees the
+                 GET request that first displayed this page. The actual
+                 login submission is a separate POST to a hardcoded action
+                 URL with no query string, so `next` was silently dropped
+                 every time. Since @login_required redirects here with
+                 ?next=<protected-page> for essentially every real login
+                 that matters, this meant nobody was ever actually returned
+                 to the page they were trying to reach -- they always
+                 landed on the homepage instead.
+
+                 SECOND FIX (found on a deeper re-check of the first fix):
+                 this originally read {{ request.GET.next }} directly --
+                 which is correct on the initial GET, but every re-render
+                 after a failed attempt (wrong password, or hitting the
+                 rate limit) happens on a POST to a URL with no query
+                 string, so request.GET.next is empty on those renders
+                 regardless of what was actually submitted. That silently
+                 reset this field to empty after any single failed
+                 attempt, so mistyping a password once and then logging in
+                 correctly on the retry still lost the destination -- the
+                 same bug, one retry later. Now uses next_value, which
+                 login_view computes once from whichever of POST/GET
+                 actually has it and passes into every render's context,
+                 instead of the template re-deriving it from request.GET
+                 each time. -->
+            <input type="hidden" name="next" value="{{ next_value|default:'' }}">
+
+            
+            <!-- Error Messages -->
+            {% if form.errors %}
+                <div id="error-msg" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <p class="text-sm">{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-{% if message.tags == 'error' %}red{% else %}blue{% endif %}-50 border border-{% if message.tags == 'error' %}red{% else %}blue{% endif %}-200 text-{% if message.tags == 'error' %}red{% else %}blue{% endif %}-700 px-4 py-3 rounded-lg">
+                        <p class="text-sm">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Email Field -->
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                </label>
+                <div class="relative">
+                    <input type="email" 
+                           name="{{ form.username.name }}" 
+                           id="{{ form.username.id_for_label }}"
+                           value="{{ form.username.value|default_if_none:'' }}"
+                           required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                           placeholder="Enter your email">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                </label>
+                <div class="relative">
+                    <input type="password" 
+                           name="{{ form.password.name }}" 
+                           id="{{ form.password.id_for_label }}"
+                           required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                           placeholder="Enter your password">
+                    <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="eye-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="flex items-center justify-between">
+                <label class="flex items-center">
+                    <input type="checkbox" name="remember_me" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                    <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                </label>
+                <a href="{% url 'accounts:password_reset' %}" class="text-sm text-primary-600 hover:text-primary-500 font-medium">
+                    Forgot password?
+                </a>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submit-btn" 
+                    class="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-3 px-4 rounded-lg hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl">
+                <span id="btn-text">Sign In</span>
+                <div id="btn-spinner" class="hidden inline-flex items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing in...
+                </div>
+            </button>
+        </form>
+
+        <!-- Sign Up Link -->
+        <div class="mt-8 text-center">
+            <p class="text-sm text-gray-600">
+                Don't have an account? 
+                <a href="{% url 'signup:signup' %}" class="text-primary-600 hover:text-primary-500 font-medium">
+                    Create one now
+                </a>
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const googleBtn = document.getElementById('google-btn');
+    const logo = document.getElementById('logo');
+    const togglePassword = document.getElementById('toggle-password');
+    const passwordInput = document.querySelector('input[type="password"]');
+    const eyeIcon = document.getElementById('eye-icon');
+    
+    // Password visibility toggle
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                `;
+            } else {
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                `;
+            }
+        });
+    }
+    
+    // Konami code Easter egg
+    let konamiCode = [];
+    const konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65]; // ↑↑↓↓←→←→BA
+    
+    document.addEventListener('keydown', function(e) {
+        konamiCode.push(e.keyCode);
+        if (konamiCode.length > konami.length) {
+            konamiCode.shift();
+        }
+        if (konamiCode.join(',') === konami.join(',')) {
+            document.body.classList.add('konami-mode');
+            showNotification('🎮 Konami code activated! Developer powers unlocked!', 'success');
+            setTimeout(() => {
+                document.body.classList.remove('konami-mode');
+            }, 3000);
+        }
+    });
+
+    // Logo click Easter egg
+    let logoClicks = 0;
+    if (logo) {
+        logo.addEventListener('click', function() {
+            logoClicks++;
+            if (logoClicks === 5) {
+                showNotification('🗺️ You found the secret! Bon voyage! ✈️', 'success');
+                logoClicks = 0;
+            }
+        });
+    }
+
+    // Google login
+    if (googleBtn) {
+        googleBtn.addEventListener('click', function() {
+            window.location.href = '{% url "google_login" %}';
+        });
+    }
+
+    // Form submission with loading state
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnSpinner.classList.remove('hidden');
+
+            // Let Django handle the actual submission.
+            // Reset button state after a timeout as fallback (e.g. if the
+            // request hangs) -- on a normal successful submission the
+            // browser navigates away before this ever fires.
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnSpinner.classList.add('hidden');
+            }, 10000);
+        });
+    }
+
+    // Enhanced notification function
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(n => n.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `notification fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full ${getNotificationClasses(type)}`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <span class="mr-2">${getNotificationIcon(type)}</span>
+                <span class="text-sm font-medium">${message}</span>
+                <button class="ml-4 text-current opacity-70 hover:opacity-100" onclick="this.parentElement.parentElement.remove()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Trigger animation
+        setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.classList.add('translate-x-full');
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    }
+    
+    function getNotificationClasses(type) {
+        const classes = {
+            success: 'bg-green-500 text-white',
+            error: 'bg-red-500 text-white', 
+            info: 'bg-blue-500 text-white',
+            warning: 'bg-yellow-500 text-white'
+        };
+        return classes[type] || classes.info;
+    }
+    
+    function getNotificationIcon(type) {
+        const icons = {
+            success: '✅',
+            error: '❌',
+            info: 'ℹ️',
+            warning: '⚠️'
+        };
+        return icons[type] || icons.info;
+    }
+
+    // Auto-focus first input
+    const firstInput = document.querySelector('input[type="email"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'web_interface/base.html' %}
+{% load static %}
+
+{% block title %}{{ item.name }} - TravelEase{% endblock %}
+{% block meta_description %}{{ item.description|truncatewords:25 }}{% endblock %}
+
+{% block og_title %}{{ item.name }} - TravelEase{% endblock %}
+{% block og_description %}{{ item.description|truncatewords:25 }}{% endblock %}
+{% block og_image_path %}{% if item.image %}{{ item.image }}{% else %}{% static 'images/og-image.jpg' %}{% endif %}{% endblock %}
+{% block og_image_alt %}{{ item.name }}{% endblock %}
+{% block page_path %}{% url 'web_interface:travel_detail' item.id %}{% endblock %}
+
+{% block twitter_title %}{{ item.name }} - TravelEase{% endblock %}
+{% block twitter_description %}{{ item.description|truncatewords:25 }}{% endblock %}
+{% block twitter_image_path %}{% if item.image %}{{ item.image }}{% else %}{% static 'images/og-image.jpg' %}{% endif %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+{% endblock %}
+
+{% block content %}
+<section class="hero-gradient text-white py-16">
+    <div class="container mx-auto px-4">
+        <nav class="mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2 text-sm text-white/80">
+                <li><a href="{% url 'web_interface:home' %}" class="hover:text-white transition-colors">Home</a></li>
+                <li>/</li>
+                <li><a href="{% url 'web_interface:search_travel_options' %}" class="hover:text-white transition-colors">Explore</a></li>
+                <li>/</li>
+                <li class="text-white font-medium">{{ item.name }}</li>
+            </ol>
+        </nav>
+        <span class="inline-block bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium mb-4">
+            {{ item.location.name }}
+        </span>
+        <h1 class="text-4xl font-bold">{{ item.name }}</h1>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 max-w-6xl">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+    <div class="lg:col-span-3">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="relative w-full h-64 sm:h-80">
+            {% if item.image %}
+            <img src="{{ item.image }}" alt="{{ item.name }}"
+                 class="w-full h-64 sm:h-80 object-cover" loading="lazy"
+                 onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling){this.nextElementSibling.style.display='flex';}">
+            {% endif %}
+            <div class="w-full h-64 sm:h-80 image-placeholder destination"
+                 {% if item.image %}style="display:none;"{% endif %}>
+                <div class="text-center">
+                    <div class="text-4xl mb-2">📍</div>
+                    <div class="text-sm">{{ item.name }}</div>
+                </div>
+            </div>
+            </div>
+            <div class="p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">About this destination</h2>
+            <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ item.description }}</p>
+
+            <div class="mt-8 pt-6 border-t border-gray-100 flex flex-wrap items-center gap-4">
+                <div class="text-sm text-gray-500">
+                    <strong class="text-gray-900">Location:</strong> {{ item.location.name }}
+                </div>
+                {% if item.effective_latitude and item.effective_longitude %}
+                <div class="text-sm text-gray-500">
+                    <strong class="text-gray-900">Coordinates:</strong> {{ item.effective_latitude }}, {{ item.effective_longitude }}
+                    {% if not item.latitude %}<span class="text-gray-400">(town-center estimate)</span>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <form method="post" action="{% url 'web_interface:toggle_save_item' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_type" value="destination">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <input type="hidden" name="next" value="{% url 'web_interface:travel_detail' item.id %}">
+                    {% if is_saved %}
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-3 bg-white border-2 border-primary-600 text-primary-700 font-semibold rounded-xl hover:bg-red-50 hover:border-red-400 hover:text-red-600 transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            Saved &mdash; click to remove
+                        </button>
+                    {% else %}
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            Save this destination
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+            {% else %}
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <a href="{% url 'accounts:login' %}?next={% url 'web_interface:travel_detail' item.id %}"
+                   class="text-primary-600 hover:text-primary-700 font-medium">Log in to save this destination</a>
+            </div>
+            {% endif %}
+        </div>
+        </div>
+    </div>
+
+    <div class="lg:col-span-2">
+        {% include 'web_interface/includes/location_map.html' with dest_lat=item.effective_latitude dest_lng=item.effective_longitude dest_name=item.name map_id="destination" pin_color="#2563eb" %}
+    </div>
+
+    </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+{% endblock %}

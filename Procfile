@@ -1,0 +1,1 @@
+web: gunicorn travelease.wsgi

@@ -1,0 +1,56 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}{% if is_visible %}{{ profile_user.get_full_name|default:profile_user.email }} - TravelEase{% else %}Private Profile - TravelEase{% endif %}{% endblock %}
+{% block meta_description %}View this traveler's public TravelEase profile.{% endblock %}
+
+{% block content %}
+<section class="hero-gradient text-white py-12">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center gap-5">
+            {% if is_visible %}
+                <div class="w-16 h-16 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                    {{ profile_user.first_name|default:profile_user.email|first|upper }}
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold">
+                        {{ profile_user.first_name }} {{ profile_user.last_name }}
+                    </h1>
+                    {% if is_owner %}
+                        <p class="text-white/90 mt-1">This is how your public profile looks to other visitors.</p>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="w-16 h-16 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold">Private Profile</h1>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 max-w-2xl">
+        {% if is_visible %}
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Travel style</h2>
+                <p class="text-gray-700">{{ preferences.get_travel_style_display }}</p>
+            </div>
+        {% else %}
+            <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-900 mb-2">This profile is private</h2>
+                <p class="text-gray-600">This traveler hasn't made their profile public.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

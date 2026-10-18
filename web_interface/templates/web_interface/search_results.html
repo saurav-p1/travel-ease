@@ -1,0 +1,631 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}Search Results - TravelEase{% endblock %}
+{% block meta_description %}Discover amazing destinations and restaurants based on your search. Find the perfect places to visit and eat with TravelEase.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .search-filters {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .result-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .result-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Category colors (.category-destination / .category-restaurant) now
+       live in base.html's shared stylesheet -- every page that extends
+       this base gets them, not just this one. See base.html for why. */
+
+    /* .image-placeholder (+ .destination/.restaurant variants) now lives in
+       base.html so travel_detail.html/restaurant_detail.html get the same
+       treatment instead of a blank gap -- see the comment there. */
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<section class="hero-gradient text-white py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Breadcrumb -->
+            <nav class="mb-6" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2 text-sm text-white/80">
+                    <li><a href="{% url 'web_interface:home' %}" class="hover:text-white transition-colors">Home</a></li>
+                    <li><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></li>
+                    <li class="text-white font-medium">Search Results</li>
+                </ol>
+            </nav>
+            
+            <!-- Search Results Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-5xl font-bold mb-4">
+                    {% if search_query %}
+                        Results for "{{ search_query }}"
+                    {% else %}
+                        Explore Places
+                    {% endif %}
+                </h1>
+                <p class="text-xl text-white/90">
+                    {% if total_results %}
+                        Found {{ total_results }} amazing place{% if total_results != 1 %}s{% endif %} for you
+                    {% else %}
+                        Let's find your perfect destination
+                    {% endif %}
+                </p>
+            </div>
+            
+            <!-- Enhanced Search Form -->
+            <div class="search-filters rounded-2xl p-6 mb-8">
+                <form method="get" action="{% url 'web_interface:search_travel_options' %}" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Main Search -->
+                        <div class="md:col-span-2 relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                            </div>
+                            <input type="text" 
+                                   name="search"
+                                   placeholder="Search destinations, restaurants, cuisine..." 
+                                   aria-label="Search destinations, restaurants, cuisine"
+                                   value="{{ search_term|default:'' }}"
+                                   class="w-full pl-12 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 backdrop-blur-sm">
+                        </div>
+                        
+                        <!-- Search Button -->
+                        <button type="submit" 
+                                class="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold rounded-xl px-6 py-3 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            Search
+                        </button>
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-white/20">
+                        <!-- Category Filter. Same as Home's field/values/labels
+                             AND same submit behavior -- no onchange auto-submit.
+                             Auto-submitting each control independently used to
+                             mean changing 3-4 filters in a row fired 3-4
+                             separate full-page reloads back to back, each one
+                             cutting off whatever you were about to adjust next
+                             -- that's what looked like "changing filters
+                             crashes the page". Now, exactly like Home: every
+                             control here just updates this one form, and
+                             nothing is sent until you press Search. -->
+                        <select name="type" aria-label="Filter by type" class="bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/50 appearance-none">
+                            <option value="" class="text-gray-900">All Types</option>
+                            <option value="destination" class="text-gray-900" {% if result_type == 'destination' %}selected{% endif %}>Destinations</option>
+                            <option value="place_to_eat" class="text-gray-900" {% if result_type == 'place_to_eat' %}selected{% endif %}>Restaurants</option>
+                        </select>
+
+                        <!-- Location picker: search/browse around ANY saved place in
+                             Nepal (e.g. Pokhara), regardless of where you physically
+                             are right now -- same idea as setting a pickup location
+                             for someone else in a ride-hailing app. Selecting a place
+                             here takes priority unless GPS is active. -->
+                        <select name="location_id" aria-label="Search around a specific place" class="bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/50 appearance-none">
+                            <option value="" class="text-gray-900">Near Kathmandu (default)</option>
+                            {% for location in all_locations %}
+                                <option value="{{ location.id }}" class="text-gray-900" {% if selected_location and selected_location.id == location.id %}selected{% endif %}>{{ location.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <!-- "Use My Location": real browser GPS (with permission), not
+                             IP-based guessing. Takes priority over the picker above
+                             once active -- see resolve_search_origin(). -->
+                        <div class="flex gap-2">
+                            <button type="button" id="use-my-location-btn"
+                                    aria-pressed="{% if request.GET.latitude %}true{% else %}false{% endif %}"
+                                    class="flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2 border transition-colors
+                                           {% if request.GET.latitude %}bg-white text-primary-700 border-white{% else %}bg-white/20 text-white border-white/30 hover:bg-white/30{% endif %}">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+                                </svg>
+                                <span>{% if request.GET.latitude %}Using My Location{% else %}Use My Location{% endif %}</span>
+                            </button>
+                            <input type="hidden" name="latitude" id="precise-latitude" value="{{ request.GET.latitude|default:'' }}">
+                            <input type="hidden" name="longitude" id="precise-longitude" value="{{ request.GET.longitude|default:'' }}">
+                            <input type="hidden" name="location_accuracy" id="precise-accuracy" value="{{ request.GET.location_accuracy|default:'' }}">
+                        </div>
+
+                        <!-- Distance Filter: optional, defaults to no limit.
+                             No onchange auto-submit -- see the type filter's
+                             comment above for why. -->
+                        <select name="radius" aria-label="Filter by distance" class="bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/50 appearance-none">
+                            {% for value, label in radius_choices %}
+                                <option value="{{ value|default:'' }}" class="text-gray-900" {% if radius_km == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <!-- Same visible rating/open-now controls as the homepage hero
+                             form (search_results.html and home.html share one search
+                             UI now, not a full form here and a hidden-passthrough-only
+                             version there). Only rendered for restaurants/all -- these
+                             don't apply to destinations at all (no rating or hours on
+                             that model), so silently accepting a value here that gets
+                             quietly ignored server-side would just be a second version
+                             of the same "filter looks like it does something but
+                             doesn't" problem found elsewhere in this app. -->
+                        {% if result_type != 'destination' %}
+                        <div class="flex items-center gap-3 min-w-0 bg-white/20 border border-white/30 rounded-lg px-4 py-2">
+                            <label for="min-rating-slider" class="text-white text-sm whitespace-nowrap">Min. rating:</label>
+                            <input type="range"
+                                   id="min-rating-slider"
+                                   name="min_rating"
+                                   min="0"
+                                   max="5"
+                                   step="0.5"
+                                   value="{{ request.GET.min_rating|default:'0' }}"
+                                   aria-describedby="rating-display"
+                                   class="flex-1 min-w-0 accent-yellow-400">
+                            <span id="rating-display" class="text-white text-sm w-10 shrink-0 text-right">Any</span>
+                        </div>
+
+                        <label class="flex items-center gap-2 min-w-0 bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white text-sm cursor-pointer">
+                            <input type="checkbox" name="open_now" value="true" {% if request.GET.open_now == 'true' %}checked{% endif %}
+                                   class="h-4 w-4 shrink-0 rounded border-white/40 text-yellow-500 focus:ring-yellow-400">
+                            <span class="min-w-0">Open now (restaurants only)</span>
+                        </label>
+                        {% endif %}
+                        
+                        <!-- Clear Filters -->
+                        <div class="flex items-center">
+                            <a href="{% url 'web_interface:search_travel_options' %}" 
+                               class="text-white/90 hover:text-white text-sm underline">
+                                Clear All Filters
+                            </a>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-white/70 pt-2">
+                        Adjust any filters above, then press <strong>Search</strong> to apply them.
+                        {% if selected_location %}
+                            Showing results around <strong>{{ selected_location.name }}</strong>.
+                        {% elif request.GET.latitude %}
+                            Showing results near your current GPS location.
+                        {% else %}
+                            Showing results near Kathmandu. Use the location picker above to search around Pokhara or anywhere else in Nepal instead.
+                        {% endif %}
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Results Section -->
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        {% if results %}
+            <!-- Results Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                        {{ total_results }} Result{% if total_results != 1 %}s{% endif %} Found
+                    </h2>
+                    <p class="text-gray-600">
+                        {% if search_query %}
+                            Showing results for "{{ search_query }}"
+                        {% else %}
+                            Showing all available options
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <!-- Active Filters -->
+                <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
+                    {% if result_type and result_type != 'all' %}
+                        <span class="{% if result_type == 'place_to_eat' %}category-restaurant{% else %}category-destination{% endif %} text-white px-3 py-1 rounded-full text-sm font-medium">
+                            {% if result_type == 'destination' %}Destinations
+                            {% elif result_type == 'place_to_eat' %}Restaurants
+                            {% else %}{{ result_type|title }}{% endif %}
+                            <a href="?{{ querystring_without_type }}" class="ml-2 hover:text-gray-200">×</a>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if location_is_approximate %}
+                <div class="mb-6 flex items-start gap-2 text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86l-8.18 14.18A2 2 0 003.82 21h16.36a2 2 0 001.71-3.03L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    </svg>
+                    <span>
+                        Your location is only approximate (accurate to about
+                        {% widthratio location_accuracy_m 1000 1 %} km) -- the distances and
+                        sort order below may be off by that much. This usually happens on a
+                        device without GPS hardware (e.g. a desktop/laptop). For an accurate
+                        result, try again from a phone, or
+                        <a href="?{{ querystring_without_type }}&location_id=" class="underline font-medium">pick a place from the dropdown</a>
+                        above instead.
+                    </span>
+                </div>
+            {% endif %}
+
+            <!-- Results Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="results-grid">
+                {% for result in results %}
+                    <div class="result-card bg-white rounded-2xl shadow-lg overflow-hidden group animate-fade-in">
+                        <!-- Image -->
+                        <div class="relative h-48 overflow-hidden">
+                            {% if result.item.image %}
+                                <img src="{{ result.item.image }}" alt="{{ result.item.name }}"
+                                     class="w-full h-full object-cover" loading="lazy"
+                                     onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling){this.nextElementSibling.style.display='flex';}">
+                            {% endif %}
+                            <div class="w-full h-full image-placeholder {% if result.type == 'place_to_eat' %}restaurant{% else %}destination{% endif %}"
+                                 {% if result.item.image %}style="display:none;"{% endif %}>
+                                <div class="text-center">
+                                    {% if result.type == 'place_to_eat' %}
+                                        <div class="text-4xl mb-2">🍽️</div>
+                                        <div class="text-sm">Restaurant</div>
+                                    {% else %}
+                                        <div class="text-4xl mb-2">📍</div>
+                                        <div class="text-sm">Destination</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Distance Badge -->
+                            {% if result.distance is not None %}
+                            <div class="absolute top-3 left-3">
+                                <span class="bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 rounded-full text-sm font-medium">
+                                    {{ result.distance }} km away
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Rating Badge -->
+                            {% if result.item.rating is not None %}
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-yellow-400 text-gray-900 px-2 py-1 rounded-full text-sm font-bold flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        {{ result.item.rating }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Category Badge -->
+                            <div class="absolute bottom-3 left-3">
+                                {% if result.type == 'place_to_eat' %}
+                                    <span class="category-restaurant text-white px-2 py-1 rounded-full text-xs font-medium">
+                                        🍽️ {{ result.item.cuisine|default:"Restaurant" }}
+                                    </span>
+                                {% else %}
+                                    <span class="category-destination text-white px-2 py-1 rounded-full text-xs font-medium">
+                                        📍 Destination
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="p-6">
+                            <div class="mb-4">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2 break-words">
+                                    {{ result.item.name }}
+                                </h3>
+                                
+                                <!-- Location -->
+                                <div class="flex items-center text-gray-600 mb-2">
+                                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    <span class="text-sm break-words">{{ result.location_name }}</span>
+                                </div>
+                                
+                                <!-- Description -->
+                                {% if result.item.description %}
+                                    <p class="text-gray-600 text-sm line-clamp-2 mb-3">
+                                        {{ result.item.description|truncatewords:15 }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div class="flex items-center space-x-3">
+                                    <!-- Price/Average Cost -->
+                                    {% if result.item.average_cost is not None %}
+                                        <span class="text-green-600 font-semibold text-sm">
+                                            Rs. {{ result.item.average_cost }}
+                                        </span>
+                                    {% elif result.item.price_range %}
+                                        <span class="text-green-600 font-semibold text-sm">
+                                            {% if result.item.price_range == 1 %}$
+                                            {% elif result.item.price_range == 2 %}$$  
+                                            {% elif result.item.price_range == 3 %}$$$
+                                            {% elif result.item.price_range == 4 %}$$$$
+                                            {% endif %}
+                                        </span>
+                                    {% endif %}
+                                    
+                                    <!-- Open Status -->
+                                    {% if result.is_open is not None %}
+                                        <span class="text-{{ result.is_open|yesno:'green,red' }}-600 text-xs font-medium">
+                                            • {{ result.is_open|yesno:"Open,Closed" }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="flex items-center space-x-2">
+                                    {% if user.is_authenticated %}
+                                        <form method="post" action="{% url 'web_interface:toggle_save_item' %}">
+                                            {% csrf_token %}
+                                            {% if result.type == 'place_to_eat' %}
+                                                <input type="hidden" name="item_type" value="restaurant">
+                                            {% else %}
+                                                <input type="hidden" name="item_type" value="destination">
+                                            {% endif %}
+                                            <input type="hidden" name="item_id" value="{{ result.item.id }}">
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                            <button type="submit"
+                                                    class="p-2 rounded-lg border transition-colors duration-200 {% if result.is_saved %}border-red-300 text-red-500 hover:bg-red-50{% else %}border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300{% endif %}"
+                                                    title="{% if result.is_saved %}Remove from saved items{% else %}Save this item{% endif %}">
+                                                {% if result.is_saved %}
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                                                    </svg>
+                                                {% else %}
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                                                    </svg>
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    <!-- View Details Button -->
+                                    {% if result.type == 'place_to_eat' %}
+                                        <a href="{% url 'web_interface:restaurant_detail' result.item.id %}" 
+                                           class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                            View Details
+                                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'web_interface:travel_detail' result.item.id %}" 
+                                           class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                                            View Details
+                                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if results.has_other_pages %}
+            <div class="flex justify-center mt-12">
+                <nav class="flex items-center space-x-2" aria-label="Pagination">
+                    {% if results.has_previous %}
+                        <a href="?{{ base_querystring }}{% if base_querystring %}&{% endif %}page={{ results.previous_page_number }}"
+                           class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full hover:border-primary-300 hover:text-primary-700 transition-colors">
+                            ← Previous
+                        </a>
+                    {% endif %}
+
+                    <span class="px-5 py-2 bg-primary-600 text-white rounded-full font-medium">
+                        Page {{ results.number }} of {{ results.paginator.num_pages }}
+                    </span>
+
+                    {% if results.has_next %}
+                        <a href="?{{ base_querystring }}{% if base_querystring %}&{% endif %}page={{ results.next_page_number }}"
+                           class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full hover:border-primary-300 hover:text-primary-700 transition-colors">
+                            Next →
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- No Results State -->
+            <div class="text-center py-16">
+                <div class="max-w-md mx-auto">
+                    <div class="w-24 h-24 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-12 h-12 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">No results found</h3>
+                    <p class="text-gray-600 mb-8">
+                        {% if search_query %}
+                            We couldn't find any results for "{{ search_query }}". Try adjusting your search terms.
+                        {% else %}
+                            No results found. Try a different search.
+                        {% endif %}
+                    </p>
+                    
+                    <!-- Suggestions -->
+                    <div class="space-y-3">
+                        <h4 class="font-semibold text-gray-900">Try searching for:</h4>
+                        <div class="flex flex-wrap justify-center gap-2">
+                            <a href="?search=Kathmandu" class="px-4 py-2 bg-primary-50 text-primary-700 rounded-full text-sm hover:bg-primary-100 transition-colors">Kathmandu</a>
+                            <a href="?search=Pokhara" class="px-4 py-2 bg-accent-50 text-accent-700 rounded-full text-sm hover:bg-accent-100 transition-colors">Pokhara</a>
+                            <a href="?search=temple" class="px-4 py-2 bg-primary-50 text-primary-700 rounded-full text-sm hover:bg-primary-100 transition-colors">Temples</a>
+                            <a href="?search=Nepali" class="px-4 py-2 bg-accent-50 text-accent-700 rounded-full text-sm hover:bg-accent-100 transition-colors">Nepali Food</a>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <a href="{% url 'web_interface:search_travel_options' %}" 
+                           class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            Show All Places
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Rating slider label -- same behavior as home.html's hero form.
+    const ratingSlider = document.getElementById('min-rating-slider');
+    const ratingDisplay = document.getElementById('rating-display');
+    if (ratingSlider && ratingDisplay) {
+        const updateRatingDisplay = () => {
+            const value = parseFloat(ratingSlider.value);
+            ratingDisplay.textContent = (!value || value === 0) ? 'Any' : value.toFixed(1) + '+';
+        };
+        updateRatingDisplay();
+        ratingSlider.addEventListener('input', updateRatingDisplay);
+    }
+
+    // The location picker and "Use My Location" GPS button both set the
+    // search origin -- only one should be in effect at a time (GPS always
+    // wins in resolve_search_origin() if both are present). Clear the
+    // other control before submitting so the UI doesn't show a location
+    // name selected while GPS is silently overriding it, or vice versa.
+    document.querySelector('select[name="location_id"]')?.addEventListener('change', function () {
+        const lat = document.getElementById('precise-latitude');
+        const lon = document.getElementById('precise-longitude');
+        if (lat) lat.value = '';
+        if (lon) lon.value = '';
+        this.form.submit();
+    });
+
+    // "Use my location" -- GPS is now the default search origin unless
+    // you've explicitly picked a place from the dropdown above (which
+    // always wins once selected -- see resolve_search_origin() and the
+    // location_id-picker handler above). On first load each browser
+    // session (and only if no place is selected and no coordinates are
+    // already in the URL), this silently attempts a GPS fix and, if
+    // granted, reloads the search with it applied -- exactly like
+    // clicking the button below yourself. Denied/unavailable just keeps
+    // the existing Kathmandu-area default; it never prompts again this
+    // session (sessionStorage flag below) and never touches an explicit
+    // place selection.
+    function requestPreciseLocation(onSuccess, onError) {
+        if (!navigator.geolocation) {
+            onError({ code: 0, message: 'unsupported' });
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+            // FOUND DURING AUDIT: this call previously passed no options at
+            // all, which defaults to enableHighAccuracy: false -- browsers
+            // commonly interpret that as "prefer a fast, low-power Wi-Fi/
+            // cell-tower/IP fix over the actual GPS chip", which is exactly
+            // the kind of imprecise result ("use my location" doesn't find
+            // you / is off by miles) this is meant to prevent.
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000,
+        });
+    }
+
+    document.getElementById('use-my-location-btn')?.addEventListener('click', function () {
+        const btn = this;
+        const isActive = btn.getAttribute('aria-pressed') === 'true';
+
+        if (isActive) {
+            document.getElementById('precise-latitude').value = '';
+            document.getElementById('precise-longitude').value = '';
+            document.getElementById('precise-accuracy').value = '';
+            btn.closest('form').submit();
+            return;
+        }
+
+        const showLocationMessage = (msg) => {
+            let banner = document.getElementById('location-error-banner');
+            if (!banner) {
+                banner = document.createElement('p');
+                banner.id = 'location-error-banner';
+                banner.className = 'text-xs text-yellow-100 bg-red-500/30 rounded-lg px-3 py-2 mt-2';
+                btn.closest('form').appendChild(banner);
+            }
+            banner.textContent = msg;
+        };
+
+        if (!navigator.geolocation) {
+            showLocationMessage('Your browser does not support location detection.');
+            return;
+        }
+        btn.disabled = true;
+        requestPreciseLocation(
+            function (position) {
+                document.getElementById('precise-latitude').value = position.coords.latitude;
+                document.getElementById('precise-longitude').value = position.coords.longitude;
+                document.getElementById('precise-accuracy').value = position.coords.accuracy;
+                // Picking GPS overrides any location chosen in the
+                // dropdown -- reset it to the default so the UI doesn't
+                // show a place name selected that's no longer in effect.
+                const picker = document.querySelector('select[name="location_id"]');
+                if (picker) picker.value = '';
+                btn.closest('form').submit();
+            },
+            function () {
+                btn.disabled = false;
+                showLocationMessage('Could not get your location. Please check your browser/OS location permissions and try again.');
+            }
+        );
+    });
+
+    (function autoUseGpsByDefault() {
+        const btn = document.getElementById('use-my-location-btn');
+        const form = btn ? btn.closest('form') : null;
+        if (!btn || !form) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const hasExplicitCoords = !!params.get('latitude');
+        const hasExplicitPlace = !!params.get('location_id');
+        const alreadyAttemptedThisSession = sessionStorage.getItem('travelease_geo_attempted') === '1';
+
+        if (hasExplicitCoords || hasExplicitPlace || alreadyAttemptedThisSession || !navigator.geolocation) {
+            return;
+        }
+        sessionStorage.setItem('travelease_geo_attempted', '1');
+
+        requestPreciseLocation(
+            function (position) {
+                document.getElementById('precise-latitude').value = position.coords.latitude;
+                document.getElementById('precise-longitude').value = position.coords.longitude;
+                document.getElementById('precise-accuracy').value = position.coords.accuracy;
+                form.submit();
+            },
+            function () {
+                // Denied/unavailable/timed out -- keep the Kathmandu-area
+                // default silently; the button above still lets a visitor
+                // retry explicitly any time.
+            }
+        );
+    })();
+</script>
+{% endblock %}

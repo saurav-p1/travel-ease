@@ -1,0 +1,193 @@
+{% extends 'web_interface/base.html' %}
+{% load static %}
+
+{% block title %}{{ restaurant.name }} - TravelEase{% endblock %}
+{% block meta_description %}{{ restaurant.name }} - {{ restaurant.cuisine }} in {{ restaurant.location.name }}.{% endblock %}
+
+{% block og_title %}{{ restaurant.name }} - TravelEase{% endblock %}
+{% block og_description %}{{ restaurant.name }} - {{ restaurant.cuisine }} in {{ restaurant.location.name }}.{% endblock %}
+{% block og_image_path %}{% if restaurant.image %}{{ restaurant.image }}{% else %}{% static 'images/og-image.jpg' %}{% endif %}{% endblock %}
+{% block og_image_alt %}{{ restaurant.name }}{% endblock %}
+{% block page_path %}{% url 'web_interface:restaurant_detail' restaurant.id %}{% endblock %}
+
+{% block twitter_title %}{{ restaurant.name }} - TravelEase{% endblock %}
+{% block twitter_description %}{{ restaurant.name }} - {{ restaurant.cuisine }} in {{ restaurant.location.name }}.{% endblock %}
+{% block twitter_image_path %}{% if restaurant.image %}{{ restaurant.image }}{% else %}{% static 'images/og-image.jpg' %}{% endif %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+{% endblock %}
+
+{% block content %}
+<section class="text-white py-16" style="background: linear-gradient(135deg, #e08e22, #9c5b0c);">
+    <div class="container mx-auto px-4">
+        <nav class="mb-6" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2 text-sm text-white/80">
+                <li><a href="{% url 'web_interface:home' %}" class="hover:text-white transition-colors">Home</a></li>
+                <li>/</li>
+                <li><a href="{% url 'web_interface:places_to_eat' %}" class="hover:text-white transition-colors">Places to Eat</a></li>
+                <li>/</li>
+                <li class="text-white font-medium">{{ restaurant.name }}</li>
+            </ol>
+        </nav>
+        <div class="flex items-center gap-3 mb-4">
+            <span class="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">{{ restaurant.cuisine }}</span>
+            <span class="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">{{ restaurant.get_price_range_display }}</span>
+            {% if is_open is not None %}
+                {% if is_open %}
+                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">Open now</span>
+                {% else %}
+                    <span class="bg-gray-500 text-white px-3 py-1 rounded-full text-sm font-medium">Closed now</span>
+                {% endif %}
+            {% endif %}
+        </div>
+        <h1 class="text-4xl font-bold">{{ restaurant.name }}</h1>
+        <p class="mt-2 text-white/90">{{ restaurant.location.name }}</p>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 max-w-6xl">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+    <div class="lg:col-span-3">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="relative w-full h-64 sm:h-80">
+            {% if restaurant.image %}
+            <img src="{{ restaurant.image }}" alt="{{ restaurant.name }}"
+                 class="w-full h-64 sm:h-80 object-cover" loading="lazy"
+                 onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling){this.nextElementSibling.style.display='flex';}">
+            {% endif %}
+            <div class="w-full h-64 sm:h-80 image-placeholder restaurant"
+                 {% if restaurant.image %}style="display:none;"{% endif %}>
+                <div class="text-center">
+                    <div class="text-4xl mb-2">🍽️</div>
+                    <div class="text-sm">{{ restaurant.name }}</div>
+                </div>
+            </div>
+            </div>
+            <div class="p-8">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-accent-600">
+                        {% if restaurant.rating is not None %}{{ restaurant.rating }} &#9733;{% else %}<span class="text-gray-400 text-base">Not yet rated</span>{% endif %}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        Rating{% if ratings_count %} &middot; {{ ratings_count }} review{{ ratings_count|pluralize }}{% endif %}
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900">
+                        {% if restaurant.average_cost is not None %}Rs. {{ restaurant.average_cost }}{% else %}<span class="text-gray-400 text-base">Unknown</span>{% endif %}
+                    </div>
+                    <div class="text-sm text-gray-500">Avg. cost / person</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900">{{ restaurant.get_price_range_display }}</div>
+                    <div class="text-sm text-gray-500">Price range</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900">{{ restaurant.business_hours|default:"N/A" }}</div>
+                    <div class="text-sm text-gray-500">Hours</div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-gray-100 flex flex-wrap items-center gap-4 mb-2">
+                <div class="text-sm text-gray-500">
+                    <strong class="text-gray-900">Location:</strong> {{ restaurant.location.name }}
+                </div>
+                {% if restaurant.effective_latitude and restaurant.effective_longitude %}
+                <div class="text-sm text-gray-500">
+                    <strong class="text-gray-900">Coordinates:</strong> {{ restaurant.effective_latitude }}, {{ restaurant.effective_longitude }}
+                    {% if not restaurant.latitude %}<span class="text-gray-400">(town-center estimate)</span>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="pt-6 border-t border-gray-100">
+                <h2 class="text-lg font-bold text-gray-900 mb-3">
+                    {% if user_rating %}Update your rating{% else %}Rate this place{% endif %}
+                </h2>
+                <form method="post" action="{% url 'web_interface:submit_restaurant_rating' restaurant.id %}"
+                      class="flex flex-wrap items-end gap-4">
+                    {% csrf_token %}
+                    <div>
+                        <label for="rating-input" class="block text-sm font-medium text-gray-700 mb-1">Your rating (0-5)</label>
+                        <input type="number" id="rating-input" name="rating" min="0" max="5" step="0.1" required
+                               value="{{ user_rating.rating|default:'' }}"
+                               class="w-28 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-400">
+                    </div>
+                    <div>
+                        <label for="cost-input" class="block text-sm font-medium text-gray-700 mb-1">Avg. cost / person, Rs. (optional)</label>
+                        <input type="number" id="cost-input" name="average_cost" min="0" step="0.5"
+                               value="{{ user_rating.average_cost|default:'' }}"
+                               placeholder="e.g. 8.50"
+                               class="w-40 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent-400">
+                    </div>
+                    <button type="submit"
+                            class="px-6 py-2 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-colors duration-200">
+                        {% if user_rating %}Update{% else %}Submit{% endif %}
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div class="pt-6 border-t border-gray-100">
+                <a href="{% url 'accounts:login' %}?next={% url 'web_interface:restaurant_detail' restaurant.id %}"
+                   class="text-primary-600 hover:text-primary-700 font-medium">Log in to rate this restaurant</a>
+            </div>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+            <div class="pt-6 border-t border-gray-100">
+                <form method="post" action="{% url 'web_interface:toggle_save_item' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="item_type" value="restaurant">
+                    <input type="hidden" name="item_id" value="{{ restaurant.id }}">
+                    <input type="hidden" name="next" value="{% url 'web_interface:restaurant_detail' restaurant.id %}">
+                    {% if is_saved %}
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-3 bg-white border-2 border-accent-600 text-accent-700 font-semibold rounded-xl hover:bg-red-50 hover:border-red-400 hover:text-red-600 transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
+                                <path d="M7 2v20"/>
+                                <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/>
+                            </svg>
+                            Saved &mdash; click to remove
+                        </button>
+                    {% else %}
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-accent-500 to-accent-700 hover:from-accent-600 hover:to-accent-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
+                                <path d="M7 2v20"/>
+                                <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/>
+                            </svg>
+                            Save this restaurant
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+            {% else %}
+            <div class="pt-6 border-t border-gray-100">
+                <a href="{% url 'accounts:login' %}?next={% url 'web_interface:restaurant_detail' restaurant.id %}"
+                   class="text-primary-600 hover:text-primary-700 font-medium">Log in to save this restaurant</a>
+            </div>
+            {% endif %}
+        </div>
+        </div>
+    </div>
+
+    <div class="lg:col-span-2">
+        {% include 'web_interface/includes/location_map.html' with dest_lat=restaurant.effective_latitude dest_lng=restaurant.effective_longitude dest_name=restaurant.name map_id="restaurant" pin_color="#c2740f" %}
+    </div>
+
+    </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+{% endblock %}

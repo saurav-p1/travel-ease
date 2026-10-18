@@ -1,0 +1,168 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}TravelEase - Profile{% endblock %}
+{% block meta_description %}View and manage your TravelEase profile, saved items, and recent browsing history.{% endblock %}
+
+{% block content %}
+<section class="hero-gradient text-white py-12">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center gap-5">
+            <div class="w-16 h-16 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-2xl font-bold flex-shrink-0">
+                {{ user.first_name|default:user.email|first|upper }}
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold">
+                    {% if user.first_name or user.last_name %}
+                        {{ user.first_name }} {{ user.last_name }}
+                    {% else %}
+                        Your Profile
+                    {% endif %}
+                </h1>
+                <p class="text-white/90 mt-1">{{ user.email|default:"No email on file" }}</p>
+                {% if user.full_phone_number %}
+                    <p class="text-white/80 text-sm mt-1">{{ user.full_phone_number }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 max-w-4xl space-y-8">
+
+        <!-- Recent Browsing History -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-900">Recent Browsing History</h2>
+                {% if recent_browsing %}
+                    <a href="{% url 'web_interface:recent_views' %}" class="text-primary-600 text-sm font-medium hover:underline">View all</a>
+                {% endif %}
+            </div>
+            {% if recent_browsing %}
+                <ul class="divide-y divide-gray-100">
+                    {% for browse in recent_browsing %}
+                        <li class="py-3 flex items-center justify-between gap-4">
+                            {% if browse.item_url %}
+                                <a href="{{ browse.item_url }}" class="text-gray-800 font-medium hover:text-primary-600 truncate">{{ browse.item_title|default:"Untitled item" }}</a>
+                            {% else %}
+                                <span class="text-gray-800 font-medium truncate">{{ browse.item_title|default:"Untitled item" }}</span>
+                            {% endif %}
+                            <span class="text-sm text-gray-500 flex-shrink-0">{{ browse.viewed_at|timesince }} ago</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <p class="text-gray-600">No recent browsing history yet.</p>
+                    <a href="{% url 'web_interface:search_travel_options' %}" class="text-primary-600 hover:underline text-sm font-medium">Start exploring</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Saved Items -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-900">Saved Items</h2>
+                {% if saved_items %}
+                    <a href="{% url 'web_interface:saved_items' %}" class="text-primary-600 text-sm font-medium hover:underline">View all</a>
+                {% endif %}
+            </div>
+            {% if saved_items %}
+                <ul class="divide-y divide-gray-100">
+                    {% for item in saved_items %}
+                        <li class="py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="{% if item.item_type == 'restaurant' %}category-restaurant{% else %}category-destination{% endif %} text-white text-xs font-medium px-2 py-1 rounded-full flex-shrink-0">
+                                    {{ item.get_item_type_display }}
+                                </span>
+                                {% if item.item_url %}
+                                    <a href="{{ item.item_url }}" class="text-gray-800 font-medium hover:text-primary-600 truncate flex-1">{{ item.item_title|default:"Untitled item" }}</a>
+                                {% else %}
+                                    <span class="text-gray-800 font-medium truncate flex-1">{{ item.item_title|default:"Untitled item" }}</span>
+                                {% endif %}
+                                <span class="text-sm text-gray-500 flex-shrink-0">{{ item.saved_at|timesince }} ago</span>
+                            </div>
+                            {% if item.notes %}<p class="text-gray-600 text-sm mt-1 ml-1">{{ item.notes }}</p>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 bg-accent-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <p class="text-gray-600">No saved items yet.</p>
+                    <a href="{% url 'web_interface:search_travel_options' %}" class="text-primary-600 hover:underline text-sm font-medium">Find something to save</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Travel Preferences -->
+        {% if user_preferences %}
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-900">Travel Preferences</h2>
+                <a href="{% url 'accounts:preferences' %}" class="text-sm font-medium text-primary-600 hover:text-primary-700">Edit settings</a>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                <div>
+                    <div class="text-sm text-gray-500">Currency</div>
+                    <div class="font-semibold text-gray-900">{{ user_preferences.preferred_currency }}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500">Language</div>
+                    <div class="font-semibold text-gray-900">{{ user_preferences.preferred_language|upper }}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500">Travel style</div>
+                    <div class="font-semibold text-gray-900">{{ user_preferences.get_travel_style_display }}</div>
+                </div>
+            </div>
+            {% if user_preferences.profile_visibility == 'public' %}
+                <p class="text-sm text-gray-500 mt-4">
+                    Your profile is public --
+                    <a href="{% url 'accounts:public_profile' user.id %}" class="text-primary-600 hover:underline">view it</a>.
+                </p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Recent Login Activity -->
+        {% if login_history %}
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Login Activity</h2>
+            <ul class="divide-y divide-gray-100">
+                {% for entry in login_history %}
+                    <li class="py-3 flex items-center justify-between gap-4">
+                        <span class="capitalize text-gray-800 font-medium">{{ entry.action }}</span>
+                        <span class="text-sm text-gray-500">{{ entry.ip_address|default:"Unknown IP" }}</span>
+                        <span class="text-sm text-gray-500 flex-shrink-0">{{ entry.timestamp|timesince }} ago</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Account -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">Account</h2>
+                <p class="text-gray-600 text-sm mt-1">Signed in as {{ user.email|default:"Not provided" }}</p>
+            </div>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="px-5 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-colors duration-200">
+                    Log out
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

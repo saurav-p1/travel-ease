@@ -1,0 +1,814 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+  <title>Join TravelEase - Your Adventure Awaits</title>
+  <meta name="description" content="Sign up for TravelEase and start discovering amazing destinations and restaurants worldwide." />
+  <!-- Tailwind CSS: pre-compiled at build time, shared with every other
+       page (see web_interface/templates/web_interface/base.html) instead
+       of this page loading its own separate CDN copy. -->
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+  <!-- Google Sign-In API loaded async -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+          Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0); }
+      33% { transform: translateY(-10px) rotate(2deg); }
+      66% { transform: translateY(5px) rotate(-1deg); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0); }
+      25% { transform: rotate(3deg); }
+      75% { transform: rotate(-3deg); }
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .konami-active {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7) !important;
+      background-size: 400% 400% !important;
+      animation: gradient 15s ease infinite !important;
+    }
+    /* Floating icons */
+    .floating-icon {
+      animation: float 6s ease-in-out infinite;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: none;
+      position: absolute;
+      color: #ffffff; /* matches the white accents used on the same
+                          gradient elsewhere in the app (home hero) */
+      opacity: 0.35;
+      filter: drop-shadow(0 0 2px rgba(0,0,0,0.15));
+    }
+    .floating-icon:hover {
+      transform: scale(1.2) !important;
+      opacity: 0.6 !important;
+    }
+    /* Logo */
+    .travel-logo:hover {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    .easter-egg-trigger {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .easter-egg-trigger:hover {
+      animation: wiggle 0.5s ease-in-out;
+    }
+    /* Secret message */
+    .secret-message {
+      display: none;
+      background: linear-gradient(45deg, #fbbf24, #f59e0b);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px auto;
+      max-width: 320px;
+      text-align: center;
+      font-weight: 700;
+      animation: slideDown 0.5s ease forwards;
+      user-select: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    /* Journey counter */
+    .journey-counter {
+      position: fixed;
+      top: 110px;
+      right: 20px;
+      background: rgba(59,130,246,0.9);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      display: none;
+      z-index: 1100;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(59,130,246,0.6);
+      user-select: none;
+    }
+    /* Form styles overrides */
+    .form-field-group {
+      position: relative;
+    }
+    .form-field-group input:focus + .field-icon,
+    .form-field-group select:focus + .field-icon {
+      color: #3b82f6;
+      transform: scale(1.1);
+    }
+    .field-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: all 0.3s ease;
+      color: #9ca3af;
+      pointer-events: none;
+    }
+    .form-field-group:has(select) .field-icon,
+    .form-field-group:has(.phone-container) .field-icon {
+      top: 38px;
+    }
+    .password-strength {
+      height: 4px;
+      border-radius: 2px;
+      margin-top: 8px;
+      transition: all 0.3s ease;
+      background: #e5e7eb;
+    }
+    .strength-weak { background: #ef4444; width: 25%; }
+    .strength-fair { background: #f59e0b; width: 50%; }
+    .strength-good { background: #10b981; width: 75%; }
+    .strength-strong { background: #059669; width: 100%; }
+    .input-valid {
+      border-color: #10b981;
+      box-shadow: 0 0 5px rgba(16, 185, 129, 0.3);
+    }
+    .input-invalid {
+      border-color: #ef4444;
+      box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
+    }
+    .country-select {
+      width: 80px;
+    }
+    .google-signin-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: white;
+      color: #374151;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+    .google-signin-placeholder:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+    }
+    /* Disabled button style */
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</head>
+<body>
+  <section class="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+    <!-- Journey counter -->
+    <div id="journey-counter" class="journey-counter" aria-live="polite" aria-atomic="true" role="region">
+      🧳 Adventures planned: <span id="click-count">0</span>
+    </div>
+
+    <!-- Background Icons -->
+    <div class="absolute inset-0 pointer-events-none">
+      <span class="floating-icon top-[40px] left-[40px] text-5xl opacity-20 select-none" title="✈️ Flight">✈️</span>
+      <span class="floating-icon top-[90px] right-[80px] text-4xl opacity-15 select-none" title="🏖️ Beach">🏖️</span>
+      <span class="floating-icon bottom-[140px] left-[90px] text-4xl opacity-20 select-none" title="🍕 Food">🍕</span>
+      <span class="floating-icon bottom-[90px] right-[120px] text-5xl opacity-15 select-none" title="🏔️ Mountain">🏔️</span>
+      <span class="floating-icon top-1/2 left-1/4 text-3xl opacity-10 select-none" style="transform: translateY(-50%);" title="🎒 Backpack">🎒</span>
+      <span class="floating-icon top-[200px] right-[200px] text-4xl opacity-15 select-none" title="🗺️ Map">🗺️</span>
+    </div>
+
+    <main class="relative z-20 max-w-md w-full space-y-8">
+      <header class="text-center">
+        <div class="flex justify-center mb-6">
+          <button aria-label="TravelEase logo" class="travel-logo w-20 h-20 bg-blue-600 rounded-2xl shadow-lg flex items-center justify-center hover:scale-110 transition-transform ease-in-out duration-300 easter-egg-trigger" type="button" tabindex="0">
+            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"></path>
+              <circle cx="12" cy="11" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <h1 class="text-4xl font-extrabold text-white mb-3">
+          Join TravelEase
+        </h1>
+        <p class="text-lg text-white/90 mb-4" aria-live="polite">Your global adventure starts here 🌍</p>
+        <div id="secret-message" class="secret-message" role="alert" aria-live="assertive"></div>
+      </header>
+
+      <!-- Sign In Container -->
+      <section class="bg-white rounded-3xl shadow-xl p-8 space-y-6 hover:shadow-2xl transition-shadow">
+        <div id="google-signin-container" aria-live="polite">
+          <div id="google-signin-placeholder" class="google-signin-placeholder" role="button" tabindex="0" aria-label="Continue with Google">
+            <svg viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false" width="18" height="18" class="mr-2">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"></path>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"></path>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"></path>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"></path>
+            </svg> Continue with Google
+          </div>
+        </div>
+
+        <div class="relative w-full my-6" aria-hidden="true">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm text-gray-500 bg-white max-w-max mx-auto px-2">
+            or create account with email ✨
+          </div>
+        </div>
+
+        <!-- Signup form -->
+        <form id="signup-form" novalidate autocomplete="off" class="space-y-6" method="post" action="{% url 'signup:signup' %}">
+          {% csrf_token %}
+          {% if server_error_message or form.non_field_errors %}
+          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2" role="alert">
+            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"></path>
+            </svg>
+            <span class="text-sm">
+              {% if server_error_message %}{{ server_error_message }}{% else %}{{ form.non_field_errors.0 }}{% endif %}
+            </span>
+          </div>
+          {% endif %}
+          <div id="error-messages" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"></path>
+            </svg>
+            <span id="error-content" class="text-sm"></span>
+          </div>
+          <!-- Name inputs -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-field-group">
+              <label for="first_name" class="block font-medium mb-2 text-gray-700">First Name *</label>
+              <input type="text" name="first_name" id="first_name" required aria-required="true" placeholder="John"
+                autocomplete="given-name" value="{{ form.first_name.value|default:'' }}"
+                class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+              />
+              <span class="field-icon" aria-hidden="true">👤</span>
+              <div class="error-message text-red-600 text-sm mt-1{% if not form.first_name.errors %} hidden{% endif %}" role="alert">{{ form.first_name.errors.0 }}</div>
+            </div>
+            <div class="form-field-group">
+              <label for="last_name" class="block font-medium mb-2 text-gray-700">Last Name *</label>
+              <input type="text" name="last_name" id="last_name" required aria-required="true" placeholder="Doe"
+                autocomplete="family-name" value="{{ form.last_name.value|default:'' }}"
+                class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+              />
+              <span class="field-icon" aria-hidden="true">👥</span>
+              <div class="error-message text-red-600 text-sm mt-1{% if not form.last_name.errors %} hidden{% endif %}" role="alert">{{ form.last_name.errors.0 }}</div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-field-group">
+            <label for="email" class="block font-medium mb-2 text-gray-700">Email Address *</label>
+            <input type="email" name="email" id="email" required aria-required="true" placeholder="john.doe@example.com"
+              autocomplete="email" value="{{ form.email.value|default:'' }}"
+              class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+            />
+            <span class="field-icon" aria-hidden="true">📧</span>
+            <div class="error-message text-red-600 text-sm mt-1{% if not form.email.errors %} hidden{% endif %}" role="alert">{{ form.email.errors.0 }}</div>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-field-group">
+            <label for="phone_number" class="block font-medium mb-2 text-gray-700">Phone Number (Optional)</label>
+            <div class="phone-container flex gap-2">
+              <select id="country_code" name="country_code" aria-label="Country calling code"
+                class="country-select px-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+              >
+                <!-- FOUND DURING AUDIT: this hand-written option list had
+                     drifted from signup/forms.py's SignupForm.country_code
+                     field, which defines the actual server-side choices
+                     (and needs to match exactly, since ajax_signup builds
+                     SignupForm straight from this form's POSTed field
+                     names). That Python field has +977/Nepal and even
+                     defaults to it ("Default to Nepal since you're in
+                     Kathmandu") -- but +977 was missing from this select
+                     entirely, so every real signup on a Nepal-only travel
+                     app silently defaulted to +1 (USA) with no way to
+                     choose Nepal instead. Restored to match, with Nepal
+                     first and selected by default. -->
+                {% with selected_code=form.country_code.value|default:"+977" %}
+                <option value="+977" {% if selected_code == "+977" %}selected{% endif %}>🇳🇵 +977</option>
+                <option value="+1" {% if selected_code == "+1" %}selected{% endif %}>🇺🇸 +1</option>
+                <option value="+44" {% if selected_code == "+44" %}selected{% endif %}>🇬🇧 +44</option>
+                <option value="+33" {% if selected_code == "+33" %}selected{% endif %}>🇫🇷 +33</option>
+                <option value="+49" {% if selected_code == "+49" %}selected{% endif %}>🇩🇪 +49</option>
+                <option value="+81" {% if selected_code == "+81" %}selected{% endif %}>🇯🇵 +81</option>
+                <option value="+86" {% if selected_code == "+86" %}selected{% endif %}>🇨🇳 +86</option>
+                <option value="+91" {% if selected_code == "+91" %}selected{% endif %}>🇮🇳 +91</option>
+                <option value="+61" {% if selected_code == "+61" %}selected{% endif %}>🇦🇺 +61</option>
+                {% endwith %}
+              </select>
+              <input type="tel" name="phone_number" id="phone_number" placeholder="123-456-7890" autocomplete="tel"
+                value="{{ form.phone_number.value|default:'' }}"
+                class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+              />
+            </div>
+            <span class="field-icon" aria-hidden="true">📱</span>
+            <div class="error-message text-red-600 text-sm mt-1{% if not form.phone_number.errors %} hidden{% endif %}" role="alert">{{ form.phone_number.errors.0 }}</div>
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="form-field-group">
+            <label for="date_of_birth" class="block font-medium mb-2 text-gray-700">Date of Birth (Optional)</label>
+            <input type="date" name="date_of_birth" id="date_of_birth" max="{{ dob_max }}"
+              value="{{ form.date_of_birth.value|default:'' }}"
+              class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+            />
+            <span class="field-icon" aria-hidden="true">🎂</span>
+            <div class="error-message text-red-600 text-sm mt-1{% if not form.date_of_birth.errors %} hidden{% endif %}" role="alert">{{ form.date_of_birth.errors.0 }}</div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-field-group">
+            <label for="password1" class="block font-medium mb-2 text-gray-700">Password *</label>
+            <input type="password" name="password1" id="password1" required aria-required="true" placeholder="Enter a strong password" autocomplete="new-password"
+              class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+            />
+            <span class="field-icon" aria-hidden="true">🔐</span>
+            <div id="password-strength" class="password-strength" aria-hidden="true"></div>
+            <div class="error-message text-red-600 text-sm mt-1{% if not form.password1.errors %} hidden{% endif %}" role="alert">{{ form.password1.errors.0 }}</div>
+            <p class="text-xs text-gray-500 mt-1">Password must be at least 8 characters with uppercase, lowercase, number, and special character.</p>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="form-field-group">
+            <label for="password2" class="block font-medium mb-2 text-gray-700">Confirm Password *</label>
+            <input type="password" name="password2" id="password2" required aria-required="true" placeholder="Confirm your password" autocomplete="new-password"
+              class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150"
+            />
+            <span class="field-icon" aria-hidden="true">🔒</span>
+            <div class="error-message text-red-600 text-sm mt-1{% if not form.password2.errors %} hidden{% endif %}" role="alert">{{ form.password2.errors.0 }}</div>
+          </div>
+
+          <!-- Accept terms -->
+          <div class="flex items-center space-x-3">
+            <input id="accept_policy" name="accept_policy" type="checkbox" required aria-required="true"
+              {% if form.accept_policy.value %}checked{% endif %}
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label for="accept_policy" class="text-sm text-gray-600">
+              I accept the <a href="{% url 'web_interface:terms' %}" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">Terms of Service</a> and <a href="{% url 'web_interface:privacy' %}" target="_blank" class="text-blue-600 underline font-medium hover:text-blue-800">Privacy Policy</a> *
+            </label>
+          </div>
+          {% if form.accept_policy.errors %}
+            <p class="error-message text-red-600 text-sm -mt-3" role="alert">{{ form.accept_policy.errors.0 }}</p>
+          {% endif %}
+
+          <!-- Marketing emails -->
+          <div class="flex items-center space-x-3">
+            <input id="marketing_emails" name="marketing_emails" type="checkbox"
+              {% if form.marketing_emails.value %}checked{% endif %}
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label for="marketing_emails" class="text-sm text-gray-600">
+              Send me travel tips, deals, and destination inspiration via email 📧
+            </label>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" id="submit-btn" 
+            class="w-full text-white py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            🚀 Start My Adventure
+          </button>
+        </form>
+
+        <p class="text-center mt-6 text-gray-600 text-sm">
+          Already have an account? <a href="{% url 'accounts:login' %}" class="text-blue-600 font-medium underline hover:text-blue-800 transition">Sign in here! 👋</a>
+        </p>
+      </section>
+    </main>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Prevent multiple submits
+      const form = document.getElementById('signup-form');
+      const submitBtn = document.getElementById('submit-btn');
+      const journeyCounter = document.getElementById('journey-counter');
+      const clickCountElem = document.getElementById('click-count');
+      const secretMsg = document.getElementById('secret-message');
+      const errorBox = document.getElementById('error-messages');
+      const errorContent = document.getElementById('error-content');
+
+      let clickCount = 0;
+      let konamiBuffer = [];
+      const konamiCode = [38,38,40,40,37,39,37,39,66,65];
+
+      // Show secret message utility
+      const showSecretMessage = (msg) => {
+        if (!secretMsg) return;
+        secretMsg.textContent = msg;
+        secretMsg.style.display = 'block';
+        setTimeout(() => { secretMsg.style.display = 'none'; }, 3500);
+      };
+
+      // Hide error
+      const hideError = () => {
+        if(errorBox) errorBox.classList.add('hidden');
+      };
+
+      // Show error with message
+      const showError = (msg) => {
+        if(errorBox && errorContent) {
+          errorContent.textContent = msg;
+          errorBox.classList.remove('hidden');
+          setTimeout(() => {
+            errorBox.classList.add('hidden');
+          }, 4000);
+        }
+      };
+
+      // Validation functions
+      const validateField = (field) => {
+        if (!field) return true;
+        const group = field.closest('.form-field-group');
+        const errorEl = group ? group.querySelector('.error-message') : null;
+        let valid = true;
+        let message = '';
+
+        // Required check
+        if (field.hasAttribute('required') && !field.value.trim()) {
+          valid = false;
+          message = `${field.name.replace(/_/g, ' ')} is required.`;
+        }
+
+        // Email
+        if (valid && field.type === 'email' && field.value.trim() !== '') {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(field.value.trim())) {
+            valid = false;
+            message = 'Please enter a valid email address.';
+          }
+        }
+
+        // Phone number optional but validated if entered
+        if (valid && field.name === 'phone_number' && field.value.trim() !== '') {
+          const phoneRegex = /^[\d\s\-\(\)\.+]+$/;
+          if (!phoneRegex.test(field.value.trim())) {
+            valid = false;
+            message = 'Please enter a valid phone number.';
+          }
+        }
+
+        // First and last name validation: only letters, spaces, hyphens, apostrophes, min 2 chars
+        if (valid && (field.name === 'first_name' || field.name === 'last_name') && field.value.trim() !== '') {
+          const nameRegex = /^[a-zA-Z\s'-]+$/;
+          if (!nameRegex.test(field.value.trim())) {
+            valid = false;
+            message = 'Name can only contain letters, spaces, hyphens, and apostrophes.';
+          } else if (field.value.trim().length < 2) {
+            valid = false;
+            message = 'Name must be at least 2 characters long.';
+          }
+        }
+
+        // Password strength validation for password1
+        if (valid && field.name === 'password1' && field.value.trim() !== '') {
+          const val = field.value;
+          if (val.length < 8) {
+            valid = false;
+            message = 'Password must be at least 8 characters long.';
+          } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])/.test(val)) {
+            // Special-char set matches signup/forms.py's clean_password1()
+            // exactly (!@#$%^&*(),.?":{}|<>) -- it used to be the
+            // narrower @$!%*?&, which meant a password with e.g. '#' or
+            // '.' as its special character (which the server accepts)
+            // was wrongly rejected right here in the browser before the
+            // request was ever sent.
+            valid = false;
+            message = 'Password must contain uppercase, lowercase, number, and special character.';
+          }
+        }
+
+        // Date of Birth validation if entered
+        if (valid && field.name === 'date_of_birth' && field.value.trim() !== '') {
+          const today = new Date();
+          const birthDate = new Date(field.value);
+          if (birthDate > today) {
+            valid = false;
+            message = 'Birth date cannot be in the future.';
+          } else {
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+              age--;
+            }
+            if (age < 18) {
+              valid = false;
+              message = 'You must be at least 18 years old to register.';
+            }
+          }
+        }
+
+        // Show or hide error for this field
+        if (errorEl) {
+          if (!valid) {
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+            field.classList.add('input-invalid');
+            field.classList.remove('input-valid');
+          } else {
+            errorEl.textContent = '';
+            errorEl.classList.add('hidden');
+            field.classList.remove('input-invalid');
+            field.classList.add('input-valid');
+          }
+        }
+
+        return valid;
+      };
+
+      // Passwords match validation
+      const validatePasswords = () => {
+        const p1 = form.querySelector('#password1');
+        const p2 = form.querySelector('#password2');
+        if (!p1 || !p2) return false;
+        const errorEl = p2.closest('.form-field-group').querySelector('.error-message');
+        if(p2.value && p1.value !== p2.value) {
+          if(errorEl){
+            errorEl.textContent = 'Passwords do not match.';
+            errorEl.classList.remove('hidden');
+          }
+          p2.classList.add('input-invalid');
+          p2.classList.remove('input-valid');
+          return false;
+        } else {
+          if(errorEl){
+            errorEl.textContent = '';
+            errorEl.classList.add('hidden');
+          }
+          p2.classList.remove('input-invalid');
+          p2.classList.add('input-valid');
+          return true;
+        }
+      };
+
+      // Password strength bar update
+      const passwordStrengthBar = form.querySelector('#password-strength');
+      const password1Field = form.querySelector('#password1');
+      if(password1Field && passwordStrengthBar){
+        password1Field.addEventListener('input', () => {
+          const val = password1Field.value;
+          let score = 0;
+          if(val.length >= 8) score += 25;
+          if(/[A-Z]/.test(val)) score += 25;
+          if(/[0-9]/.test(val)) score += 25;
+          if(/[^A-Za-z0-9]/.test(val)) score += 25;
+
+          passwordStrengthBar.className = 'password-strength';
+          if(score >= 100) passwordStrengthBar.classList.add('strength-strong');
+          else if(score >= 75) passwordStrengthBar.classList.add('strength-good');
+          else if(score >= 50) passwordStrengthBar.classList.add('strength-fair');
+          else if(score >= 25) passwordStrengthBar.classList.add('strength-weak');
+          else passwordStrengthBar.classList.add('strength-weak');
+        });
+      }
+
+      // Attach validation on blur & input for all required fields
+      form.querySelectorAll('input[required], select[required]').forEach(input => {
+        input.addEventListener('blur', () => validateField(input));
+        input.addEventListener('input', () => {
+          if(input.classList.contains('input-invalid')) validateField(input);
+        });
+      });
+      if(form.querySelector('#password2')) {
+        form.querySelector('#password2').addEventListener('input', validatePasswords);
+      }
+
+      // Live email-availability check. The backend endpoint for this
+      // (signup:check_email, rate-limited, fully tested) has existed the
+      // whole time, but nothing on this page ever called it -- someone
+      // could type an already-registered email, tab through every other
+      // field, and only find out it's taken after submitting the whole
+      // form. Debounced on typing and also checked on blur, using the
+      // same error-message slot and input-invalid/input-valid styling as
+      // every other field on this page, so it looks and behaves like a
+      // normal validation error rather than a separate mechanism.
+      const emailField = form.querySelector('#email');
+      if (emailField) {
+        const emailGroup = emailField.closest('.form-field-group');
+        const emailErrorEl = emailGroup ? emailGroup.querySelector('.error-message') : null;
+        let emailCheckTimer = null;
+        let emailCheckToken = 0;
+
+        const checkEmailAvailability = () => {
+          const value = emailField.value.trim();
+          // Only worth checking once it looks like a real email -- avoids
+          // spamming the endpoint (and rate limit) while someone is still
+          // mid-keystroke, and defers to the existing required/format
+          // validation for empty or malformed input.
+          if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return;
+
+          const thisToken = ++emailCheckToken;
+          fetch(`{% url "signup:check_email" %}?email=${encodeURIComponent(value)}`, {
+            credentials: 'same-origin',
+          })
+            .then(resp => resp.json())
+            .then(data => {
+              // A slower, older request finishing after a newer one must
+              // not clobber the result of the more recent check.
+              if (thisToken !== emailCheckToken) return;
+              if (data.error) return; // rate-limited -- fail open, don't block signup over this
+              if (!data.available && emailErrorEl) {
+                emailErrorEl.textContent = 'This email is already registered.';
+                emailErrorEl.classList.remove('hidden');
+                emailField.classList.add('input-invalid');
+                emailField.classList.remove('input-valid');
+              } else if (data.available && emailField.classList.contains('input-invalid')
+                         && emailErrorEl && emailErrorEl.textContent === 'This email is already registered.') {
+                emailErrorEl.textContent = '';
+                emailErrorEl.classList.add('hidden');
+                emailField.classList.remove('input-invalid');
+                emailField.classList.add('input-valid');
+              }
+            })
+            .catch(() => {}); // network hiccup here shouldn't block typing; server re-validates on submit regardless
+        };
+
+        emailField.addEventListener('blur', checkEmailAvailability);
+        emailField.addEventListener('input', () => {
+          clearTimeout(emailCheckTimer);
+          emailCheckTimer = setTimeout(checkEmailAvailability, 600);
+        });
+      }
+
+      // Floating icons click handlers - adapt to animated icons
+      document.querySelectorAll('.floating-icon').forEach(icon => {
+        icon.addEventListener('click', () => {
+          clickCount++;
+          if(clickCountElem) clickCountElem.textContent = clickCount;
+          if(journeyCounter) journeyCounter.style.display = 'block';
+
+          icon.style.transform = 'scale(1.5) rotate(360deg)';
+          setTimeout(() => { icon.style.transform = ''; }, 500);
+
+          const messages = [
+            '✈️ Flight booked in your dreams!',
+            '🏖️ Beach paradise discovered!',
+            '🍕 Local delicacy awaits!',
+            '🏔️ Mountain peak conquered!',
+            '🎒 Adventure gear packed!',
+            '🗺️ Secret route unlocked!'
+          ];
+          showSecretMessage(messages[Math.floor(Math.random() * messages.length)]);
+
+          if(clickCount === 5) showSecretMessage('🎉 Wow! You\'re really planning quite the journey!');
+          if(clickCount === 10) showSecretMessage('🌟 Master Explorer status achieved!');
+        });
+      });
+
+      // Logo click easter egg
+      const logo = document.querySelector('.travel-logo');
+      if(logo){
+        logo.addEventListener('click', () => {
+          showSecretMessage('🌍 TravelEase: Where every journey begins!');
+        });
+      }
+
+      // Konami Code listener
+      window.addEventListener('keydown', e => {
+        konamiBuffer.push(e.keyCode);
+        if(konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+        if(konamiBuffer.join(',') === konamiCode.join(',')) {
+          document.body.classList.add('konami-active');
+          showSecretMessage('🎮 KONAMI CODE ACTIVATED! Welcome, master traveler! 🎮');
+          setTimeout(() => { document.body.classList.remove('konami-active'); }, 10000);
+        }
+      });
+
+      // Google Sign-In - redirect to the real allauth OAuth flow (same
+      // endpoint login.html uses; allauth creates the account automatically
+      // on first Google sign-in, so this works for signup too).
+      const googlePlaceholder = document.getElementById('google-signin-placeholder');
+      if(googlePlaceholder) {
+        googlePlaceholder.addEventListener('click', () => {
+          window.location.href = '{% url "google_login" %}';
+        });
+      }
+
+      // Form submission -- actually creates the account via the AJAX
+      // signup endpoint (previously this just faked a loading spinner
+      // and a fake success message without ever sending the form data
+      // anywhere; no account was ever created).
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        hideError();
+        let valid = true;
+
+        form.querySelectorAll('input[required], select[required]').forEach(field => {
+          if (!validateField(field)) valid = false;
+        });
+        if (!validatePasswords()) valid = false;
+
+        const termsCheckbox = form.querySelector('#accept_policy');
+        if (termsCheckbox && !termsCheckbox.checked) {
+          valid = false;
+          showError('Please accept the Terms of Service and Privacy Policy.');
+        }
+
+        if (!valid) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = '🚀 Launching adventure...';
+        submitBtn.classList.add('animate-pulse');
+
+        // Clear any previously-shown field errors from a prior failed attempt
+        form.querySelectorAll('.error-message').forEach(el => {
+          el.textContent = '';
+          el.classList.add('hidden');
+        });
+
+        try {
+          // Get a fresh CSRF token (this page's form has no {% csrf_token %}
+          // tag, so there's a dedicated endpoint for AJAX callers to fetch one).
+          const csrfResp = await fetch('{% url "signup:csrf_token" %}', { credentials: 'same-origin' });
+          const csrfData = await csrfResp.json();
+
+          const formData = new FormData(form);
+          // Checkboxes only appear in FormData when checked; SignupForm
+          // expects an explicit value either way.
+          formData.set('marketing_emails', form.querySelector('#marketing_emails').checked ? 'on' : '');
+
+          const resp = await fetch('{% url "signup:ajax_signup" %}', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-CSRFToken': csrfData.csrfToken },
+            body: formData,
+          });
+          const data = await resp.json();
+
+          if (data.success) {
+            showSecretMessage('✅ Account created successfully! Welcome to TravelEase!');
+            submitBtn.textContent = '✅ Account Created!';
+            submitBtn.classList.remove('animate-pulse');
+            submitBtn.classList.add('bg-green-600');
+            window.location.href = data.redirect_url || '{% url "signup:success" %}';
+          } else {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 Start My Adventure';
+            submitBtn.classList.remove('animate-pulse');
+
+            const errors = data.errors || {};
+            let shownFieldError = false;
+            Object.entries(errors).forEach(([field, message]) => {
+              if (field === 'general') {
+                showError(message);
+                return;
+              }
+              const input = form.querySelector(`[name="${field}"]`);
+              const group = input ? input.closest('.form-field-group') : null;
+              const errorEl = group ? group.querySelector('.error-message') : null;
+              if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+                if (input) {
+                  input.classList.add('input-invalid');
+                  input.classList.remove('input-valid');
+                }
+                shownFieldError = true;
+              } else {
+                showError(message);
+              }
+            });
+            if (!shownFieldError && !errors.general) {
+              showError('Something went wrong. Please try again.');
+            }
+          }
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '🚀 Start My Adventure';
+          submitBtn.classList.remove('animate-pulse');
+          showError('Could not reach the server. Please check your connection and try again.');
+        }
+      });
+
+      // Initial secret welcome
+      showSecretMessage('🌟 Form ready! Start your adventure by filling out the details below.');
+    });
+  </script>
+</body>
+</html>

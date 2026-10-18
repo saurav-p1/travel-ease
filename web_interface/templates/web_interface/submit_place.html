@@ -1,0 +1,226 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}Add a Place - TravelEase{% endblock %}
+{% block meta_description %}Add a destination or restaurant you know to TravelEase. Submissions are reviewed before appearing publicly.{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="hero-gradient text-white py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <nav class="mb-6" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2 text-sm text-white/80">
+                    <li><a href="{% url 'web_interface:home' %}" class="hover:text-white transition-colors">Home</a></li>
+                    <li><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></li>
+                    <li class="text-white font-medium">Add a Place</li>
+                </ol>
+            </nav>
+            <div class="text-center">
+                <h1 class="text-3xl md:text-5xl font-bold mb-4">Know a great place?</h1>
+                <p class="text-lg text-white/90 max-w-2xl mx-auto">
+                    Add a destination or restaurant you think other travelers should know about.
+                    Every submission is reviewed before it appears publicly.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="max-w-2xl mx-auto">
+
+            <!-- Type toggle -->
+            <div class="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1 mb-8" role="tablist">
+                <button type="button" id="tab-destination"
+                        class="place-tab flex-1 py-3 rounded-lg font-medium text-sm transition-colors {% if place_type == 'destination' %}bg-primary-600 text-white{% else %}text-gray-600 hover:bg-gray-50{% endif %}"
+                        data-target="destination">
+                    Destination
+                </button>
+                <button type="button" id="tab-place_to_eat"
+                        class="place-tab flex-1 py-3 rounded-lg font-medium text-sm transition-colors {% if place_type == 'place_to_eat' %}bg-primary-600 text-white{% else %}text-gray-600 hover:bg-gray-50{% endif %}"
+                        data-target="place_to_eat">
+                    Restaurant
+                </button>
+            </div>
+
+            <!-- Destination form -->
+            <form method="post" id="form-destination" class="bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-5 {% if place_type != 'destination' %}hidden{% endif %}">
+                {% csrf_token %}
+                <input type="hidden" name="place_type" value="destination">
+
+                {% if dest_form.non_field_errors %}
+                    <div class="text-red-600 text-sm">{{ dest_form.non_field_errors }}</div>
+                {% endif %}
+
+                <div>
+                    <label for="{{ dest_form.location.id_for_label }}" class="block font-medium mb-2 text-gray-700">Town / city</label>
+                    {{ dest_form.location }}
+                    {% if dest_form.location.errors %}<p class="text-red-600 text-sm mt-1">{{ dest_form.location.errors|join:", " }}</p>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ dest_form.name.id_for_label }}" class="block font-medium mb-2 text-gray-700">Name</label>
+                    {{ dest_form.name }}
+                    {% if dest_form.name.errors %}<p class="text-red-600 text-sm mt-1">{{ dest_form.name.errors|join:", " }}</p>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ dest_form.description.id_for_label }}" class="block font-medium mb-2 text-gray-700">Description</label>
+                    {{ dest_form.description }}
+                    {% if dest_form.description.errors %}<p class="text-red-600 text-sm mt-1">{{ dest_form.description.errors|join:", " }}</p>{% endif %}
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ dest_form.latitude.id_for_label }}" class="block font-medium mb-2 text-gray-700">Latitude</label>
+                        {{ dest_form.latitude }}
+                        <p class="text-xs text-gray-500 mt-1">{{ dest_form.latitude.help_text }}</p>
+                        {% if dest_form.latitude.errors %}<p class="text-red-600 text-sm mt-1">{{ dest_form.latitude.errors|join:", " }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ dest_form.longitude.id_for_label }}" class="block font-medium mb-2 text-gray-700">Longitude</label>
+                        {{ dest_form.longitude }}
+                        {% if dest_form.longitude.errors %}<p class="text-red-600 text-sm mt-1">{{ dest_form.longitude.errors|join:", " }}</p>{% endif %}
+                    </div>
+                </div>
+                <div>
+                    <label for="{{ dest_form.image.id_for_label }}" class="block font-medium mb-2 text-gray-700">{{ dest_form.image.label }}</label>
+                    {{ dest_form.image }}
+                    <p class="text-xs text-gray-500 mt-1">{{ dest_form.image.help_text }}</p>
+                    {% if dest_form.image.errors %}<p class="text-red-600 text-sm mt-1">{{ dest_form.image.errors|join:", " }}</p>{% endif %}
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-semibold hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg">
+                    Submit destination for review
+                </button>
+            </form>
+
+            <!-- Restaurant form -->
+            <form method="post" id="form-place_to_eat" class="bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-5 {% if place_type != 'place_to_eat' %}hidden{% endif %}">
+                {% csrf_token %}
+                <input type="hidden" name="place_type" value="place_to_eat">
+
+                {% if rest_form.non_field_errors %}
+                    <div class="text-red-600 text-sm">{{ rest_form.non_field_errors }}</div>
+                {% endif %}
+
+                <div>
+                    <label for="{{ rest_form.location.id_for_label }}" class="block font-medium mb-2 text-gray-700">Town / city</label>
+                    {{ rest_form.location }}
+                    {% if rest_form.location.errors %}<p class="text-red-600 text-sm mt-1">{{ rest_form.location.errors|join:", " }}</p>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ rest_form.name.id_for_label }}" class="block font-medium mb-2 text-gray-700">Name</label>
+                    {{ rest_form.name }}
+                    {% if rest_form.name.errors %}<p class="text-red-600 text-sm mt-1">{{ rest_form.name.errors|join:", " }}</p>{% endif %}
+                </div>
+                <div>
+                    <label for="{{ rest_form.cuisine.id_for_label }}" class="block font-medium mb-2 text-gray-700">Cuisine</label>
+                    {{ rest_form.cuisine }}
+                    {% if rest_form.cuisine.errors %}<p class="text-red-600 text-sm mt-1">{{ rest_form.cuisine.errors|join:", " }}</p>{% endif %}
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ rest_form.price_range.id_for_label }}" class="block font-medium mb-2 text-gray-700">Price range</label>
+                        {{ rest_form.price_range }}
+                        {% if rest_form.price_range.errors %}<p class="text-red-600 text-sm mt-1">{{ rest_form.price_range.errors|join:", " }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ rest_form.business_hours.id_for_label }}" class="block font-medium mb-2 text-gray-700">Hours</label>
+                        {{ rest_form.business_hours }}
+                        {% if rest_form.business_hours.errors %}<p class="text-red-600 text-sm mt-1">{{ rest_form.business_hours.errors|join:", " }}</p>{% endif %}
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ rest_form.latitude.id_for_label }}" class="block font-medium mb-2 text-gray-700">Latitude</label>
+                        {{ rest_form.latitude }}
+                        <p class="text-xs text-gray-500 mt-1">{{ rest_form.latitude.help_text }}</p>
+                        {% if rest_form.latitude.errors %}<p class="text-red-600 text-sm mt-1">{{ rest_form.latitude.errors|join:", " }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ rest_form.longitude.id_for_label }}" class="block font-medium mb-2 text-gray-700">Longitude</label>
+                        {{ rest_form.longitude }}
+                        {% if rest_form.longitude.errors %}<p class="text-red-600 text-sm mt-1">{{ rest_form.longitude.errors|join:", " }}</p>{% endif %}
+                    </div>
+                </div>
+                <div>
+                    <label for="{{ rest_form.image.id_for_label }}" class="block font-medium mb-2 text-gray-700">{{ rest_form.image.label }}</label>
+                    {{ rest_form.image }}
+                    <p class="text-xs text-gray-500 mt-1">{{ rest_form.image.help_text }}</p>
+                    {% if rest_form.image.errors %}<p class="text-red-600 text-sm mt-1">{{ rest_form.image.errors|join:", " }}</p>{% endif %}
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-semibold hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg">
+                    Submit restaurant for review
+                </button>
+            </form>
+
+            <!-- My submissions -->
+            {% if my_destinations or my_restaurants %}
+            <div class="mt-12">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Your submissions</h2>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 divide-y divide-gray-100">
+                    {% for d in my_destinations %}
+                        <div class="flex items-center justify-between p-4">
+                            <div>
+                                <p class="font-medium text-gray-900">{{ d.name }}</p>
+                                <p class="text-sm text-gray-500">Destination &middot; {{ d.location.name }}</p>
+                            </div>
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full
+                                {% if d.status == 'approved' %}bg-green-100 text-green-700
+                                {% elif d.status == 'rejected' %}bg-red-100 text-red-700
+                                {% else %}bg-amber-100 text-amber-700{% endif %}">
+                                {{ d.get_status_display }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                    {% for r in my_restaurants %}
+                        <div class="flex items-center justify-between p-4">
+                            <div>
+                                <p class="font-medium text-gray-900">{{ r.name }}</p>
+                                <p class="text-sm text-gray-500">Restaurant &middot; {{ r.location.name }}</p>
+                            </div>
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full
+                                {% if r.status == 'approved' %}bg-green-100 text-green-700
+                                {% elif r.status == 'rejected' %}bg-red-100 text-red-700
+                                {% else %}bg-amber-100 text-amber-700{% endif %}">
+                                {{ r.get_status_display }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+
+<script>
+(function () {
+    var tabs = document.querySelectorAll('.place-tab');
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var target = tab.getAttribute('data-target');
+
+            tabs.forEach(function (t) {
+                var active = t.getAttribute('data-target') === target;
+                t.classList.toggle('bg-primary-600', active);
+                t.classList.toggle('text-white', active);
+                t.classList.toggle('text-gray-600', !active);
+                // The initial (server-rendered) inactive tab has
+                // hover:bg-gray-50 so it visibly responds to a hover;
+                // the active tab deliberately doesn't, so it stays a
+                // consistent blue. Without this line the class only ever
+                // gets added by the template on page load and never
+                // toggled here, so switching tabs client-side would leave
+                // it stuck on whichever tab happened to be active first --
+                // hovering the *currently active* tab would then
+                // incorrectly flash grey instead of staying blue.
+                t.classList.toggle('hover:bg-gray-50', !active);
+            });
+
+            document.getElementById('form-destination').classList.toggle('hidden', target !== 'destination');
+            document.getElementById('form-place_to_eat').classList.toggle('hidden', target !== 'place_to_eat');
+        });
+    });
+})();
+</script>
+{% endblock %}

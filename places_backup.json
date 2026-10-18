@@ -1,0 +1,2552 @@
+[
+  {
+    "model": "web_interface.location",
+    "pk": 1,
+    "fields": {
+      "name": "Banepa",
+      "latitude": 27.6298,
+      "longitude": 85.5203,
+      "property_count": 10
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 2,
+    "fields": {
+      "name": "Dhulikhel",
+      "latitude": 27.6159,
+      "longitude": 85.5391,
+      "property_count": 10
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 3,
+    "fields": {
+      "name": "Panauti",
+      "latitude": 27.5855,
+      "longitude": 85.5146,
+      "property_count": 9
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 4,
+    "fields": {
+      "name": "Namobuddha",
+      "latitude": 27.5849,
+      "longitude": 85.589,
+      "property_count": 9
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 5,
+    "fields": {
+      "name": "Khopasi",
+      "latitude": 27.6087,
+      "longitude": 85.4692,
+      "property_count": 6
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 6,
+    "fields": {
+      "name": "Kavre",
+      "latitude": 27.6483,
+      "longitude": 85.5648,
+      "property_count": 6
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 9,
+    "fields": {
+      "name": "Pokhara",
+      "latitude": 28.2096,
+      "longitude": 83.9856,
+      "property_count": 11
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 10,
+    "fields": {
+      "name": "Kathmandu",
+      "latitude": 27.7172,
+      "longitude": 85.324,
+      "property_count": 8
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 11,
+    "fields": {
+      "name": "Bhaktapur",
+      "latitude": 27.671,
+      "longitude": 85.4298,
+      "property_count": 6
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 12,
+    "fields": {
+      "name": "Patan",
+      "latitude": 27.6588,
+      "longitude": 85.3247,
+      "property_count": 5
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 13,
+    "fields": {
+      "name": "Nagarkot",
+      "latitude": 27.7167,
+      "longitude": 85.52,
+      "property_count": 3
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 14,
+    "fields": {
+      "name": "Chitwan",
+      "latitude": 27.5291,
+      "longitude": 84.3542,
+      "property_count": 6
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 15,
+    "fields": {
+      "name": "Lumbini",
+      "latitude": 27.4833,
+      "longitude": 83.2764,
+      "property_count": 5
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 16,
+    "fields": {
+      "name": "Bandipur",
+      "latitude": 27.9333,
+      "longitude": 84.4167,
+      "property_count": 5
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 17,
+    "fields": {
+      "name": "Gorkha",
+      "latitude": 28,
+      "longitude": 84.6333,
+      "property_count": 5
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 18,
+    "fields": {
+      "name": "Ilam",
+      "latitude": 26.9088,
+      "longitude": 87.9284,
+      "property_count": 5
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 19,
+    "fields": {
+      "name": "Dharan",
+      "latitude": 26.8065,
+      "longitude": 87.2846,
+      "property_count": 5
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 20,
+    "fields": {
+      "name": "Biratnagar",
+      "latitude": 26.4525,
+      "longitude": 87.2718,
+      "property_count": 4
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 21,
+    "fields": {
+      "name": "Janakpur",
+      "latitude": 26.7288,
+      "longitude": 85.9252,
+      "property_count": 4
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 22,
+    "fields": {
+      "name": "Butwal",
+      "latitude": 27.7,
+      "longitude": 83.4486,
+      "property_count": 4
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 23,
+    "fields": {
+      "name": "Palpa (Tansen)",
+      "latitude": 27.8667,
+      "longitude": 83.55,
+      "property_count": 5
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 24,
+    "fields": {
+      "name": "Surkhet",
+      "latitude": 28.6,
+      "longitude": 81.6167,
+      "property_count": 3
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 25,
+    "fields": {
+      "name": "Dhangadhi",
+      "latitude": 28.6939,
+      "longitude": 80.5877,
+      "property_count": 2
+    }
+  },
+  {
+    "model": "web_interface.location",
+    "pk": 26,
+    "fields": {
+      "name": "Jumla",
+      "latitude": 29.2747,
+      "longitude": 82.1838,
+      "property_count": 3
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 1,
+    "fields": {
+      "name": "Banepa Durbar Square",
+      "description": "Historic palace square in the heart of Banepa",
+      "location": 1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 2,
+    "fields": {
+      "name": "Chandeshwori Temple",
+      "description": "Ancient Hindu temple dedicated to Goddess Chandeshwori",
+      "location": 1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 3,
+    "fields": {
+      "name": "Banepa Market",
+      "description": "Traditional local market with authentic goods",
+      "location": 1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 4,
+    "fields": {
+      "name": "Old Banepa Town",
+      "description": "Historic town center with traditional architecture",
+      "location": 1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 5,
+    "fields": {
+      "name": "Banepa Heritage Walk",
+      "description": "Walking trail through historic sites",
+      "location": 1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 6,
+    "fields": {
+      "name": "Dhulikhel Viewpoint",
+      "description": "Stunning mountain views of the Himalayas",
+      "location": 2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 7,
+    "fields": {
+      "name": "Kali Temple Dhulikhel",
+      "description": "Sacred temple with panoramic valley views",
+      "location": 2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 8,
+    "fields": {
+      "name": "Dhulikhel Old Town",
+      "description": "Traditional Newari architecture and culture",
+      "location": 2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 9,
+    "fields": {
+      "name": "Narayani Temple",
+      "description": "Historic temple in Dhulikhel",
+      "location": 2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 10,
+    "fields": {
+      "name": "Mountain View Tower",
+      "description": "Best spot for sunrise and mountain photography",
+      "location": 2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 11,
+    "fields": {
+      "name": "Indreshwar Temple",
+      "description": "Ancient pagoda-style temple, UNESCO heritage site",
+      "location": 3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 12,
+    "fields": {
+      "name": "Panauti Museum",
+      "description": "Local museum showcasing Panauti's rich history",
+      "location": 3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 13,
+    "fields": {
+      "name": "Old Panauti",
+      "description": "Historic town with traditional Newari houses",
+      "location": 3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 14,
+    "fields": {
+      "name": "Roshi River Bridge",
+      "description": "Historic bridge over Roshi River",
+      "location": 3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 15,
+    "fields": {
+      "name": "Panauti Durbar Square",
+      "description": "Ancient royal palace square",
+      "location": 3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 16,
+    "fields": {
+      "name": "Namobuddha Monastery",
+      "description": "Sacred Buddhist monastery and pilgrimage site",
+      "location": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 17,
+    "fields": {
+      "name": "Namobuddha Stupa",
+      "description": "Holy stupa marking Buddha's previous life sacrifice",
+      "location": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 18,
+    "fields": {
+      "name": "Mountain View Point",
+      "description": "Spectacular Himalayan views from Namobuddha",
+      "location": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 19,
+    "fields": {
+      "name": "Meditation Center",
+      "description": "Peaceful place for meditation and reflection",
+      "location": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 20,
+    "fields": {
+      "name": "Pilgrimage Trail",
+      "description": "Sacred walking path for Buddhist pilgrims",
+      "location": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 21,
+    "fields": {
+      "name": "Khopasi Market",
+      "description": "Local market town on the Arniko Highway",
+      "location": 5,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 22,
+    "fields": {
+      "name": "Khopasi Viewpoint",
+      "description": "Great views of surrounding valleys",
+      "location": 5,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 23,
+    "fields": {
+      "name": "Local Temples",
+      "description": "Traditional Hindu temples in Khopasi area",
+      "location": 5,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 24,
+    "fields": {
+      "name": "Kavre District Center",
+      "description": "Administrative center of Kavre district",
+      "location": 6,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 25,
+    "fields": {
+      "name": "Local Heritage Sites",
+      "description": "Various cultural and religious sites",
+      "location": 6,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 26,
+    "fields": {
+      "name": "Traditional Villages",
+      "description": "Authentic rural Nepali village experience",
+      "location": 6,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 29,
+    "fields": {
+      "name": "Phewa Lake",
+      "description": "Pokhara's centerpiece lake, popular for boating with views of the Annapurna range reflected on the water.",
+      "location": 9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 30,
+    "fields": {
+      "name": "Sarangkot",
+      "description": "Hilltop viewpoint above the city, famous for sunrise views over the Annapurna and Machapuchare (Fishtail) peaks.",
+      "location": 9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 31,
+    "fields": {
+      "name": "World Peace Pagoda",
+      "description": "A hilltop Buddhist stupa overlooking Phewa Lake and the Pokhara valley, reachable by a short hike or boat plus walk.",
+      "location": 9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 32,
+    "fields": {
+      "name": "Davis Falls",
+      "description": "A dramatic waterfall (locally Patale Chhango) that disappears into an underground tunnel.",
+      "location": 9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 33,
+    "fields": {
+      "name": "International Mountain Museum",
+      "description": "Museum covering the history, culture, and mountaineering heritage of Nepal's Himalayan ranges.",
+      "location": 9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 34,
+    "fields": {
+      "name": "Old Pokhara Bazaar",
+      "description": "The city's older market street, with traditional Newari-style buildings and local shops.",
+      "location": 9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 35,
+    "fields": {
+      "name": "Kathmandu Durbar Square",
+      "description": "UNESCO World Heritage royal palace complex in the old city center.",
+      "location": 10,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 36,
+    "fields": {
+      "name": "Swayambhunath (Monkey Temple)",
+      "description": "Ancient hilltop Buddhist stupa overlooking the Kathmandu valley.",
+      "location": 10,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 37,
+    "fields": {
+      "name": "Boudhanath Stupa",
+      "description": "One of the largest stupas in the world, a major center of Tibetan Buddhism.",
+      "location": 10,
+      "image": "",
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 38,
+    "fields": {
+      "name": "Pashupatinath Temple",
+      "description": "Sacred Hindu temple complex on the Bagmati River, a major pilgrimage site.",
+      "location": 10,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 39,
+    "fields": {
+      "name": "Thamel",
+      "description": "The city's main tourist district, packed with shops, cafes, and trekking gear stores.",
+      "location": 10,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 40,
+    "fields": {
+      "name": "Bhaktapur Durbar Square",
+      "description": "UNESCO World Heritage site famed for its preserved medieval architecture.",
+      "location": 11,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 41,
+    "fields": {
+      "name": "Nyatapola Temple",
+      "description": "Nepal's tallest pagoda temple, a five-story structure in Taumadhi Square.",
+      "location": 11,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 42,
+    "fields": {
+      "name": "Pottery Square",
+      "description": "Traditional square where potters still shape and dry clay wares in the open.",
+      "location": 11,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 43,
+    "fields": {
+      "name": "Patan Durbar Square",
+      "description": "UNESCO World Heritage royal square known for its Newari architecture and metal craft.",
+      "location": 12,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 44,
+    "fields": {
+      "name": "Kumbheshwar Temple",
+      "description": "Historic five-story pagoda temple dedicated to Shiva.",
+      "location": 12,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 45,
+    "fields": {
+      "name": "Patan Museum",
+      "description": "Museum of traditional bronze and metal religious art, housed in a former palace.",
+      "location": 12,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 46,
+    "fields": {
+      "name": "Nagarkot Sunrise Viewpoint",
+      "description": "Hill station famous for panoramic sunrise views of the Himalayan range, including Everest on clear days.",
+      "location": 13,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 47,
+    "fields": {
+      "name": "Chitwan National Park",
+      "description": "UNESCO World Heritage jungle park known for one-horned rhinos, tigers, and elephant safaris.",
+      "location": 14,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 48,
+    "fields": {
+      "name": "Elephant Breeding Center",
+      "description": "Government-run center for breeding and caring for domesticated elephants.",
+      "location": 14,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 49,
+    "fields": {
+      "name": "Tharu Village",
+      "description": "Village showcasing the traditional culture and homes of the indigenous Tharu people.",
+      "location": 14,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 50,
+    "fields": {
+      "name": "Maya Devi Temple",
+      "description": "UNESCO World Heritage site marking the birthplace of Gautam Buddha.",
+      "location": 15,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 51,
+    "fields": {
+      "name": "Lumbini Garden",
+      "description": "Sacred garden with monasteries built by Buddhist communities from around the world.",
+      "location": 15,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 52,
+    "fields": {
+      "name": "World Peace Pagoda, Lumbini",
+      "description": "A large white stupa built as a monument to world peace.",
+      "location": 15,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 53,
+    "fields": {
+      "name": "Bandipur Bazaar",
+      "description": "Beautifully preserved Newari hill-town bazaar, closed to vehicle traffic.",
+      "location": 16,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 54,
+    "fields": {
+      "name": "Tindhare Viewpoint",
+      "description": "Ridge viewpoint with wide views of the Annapurna and Manaslu ranges.",
+      "location": 16,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 55,
+    "fields": {
+      "name": "Siddha Cave",
+      "description": "One of the largest cave chambers in Nepal, a short hike from town.",
+      "location": 16,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 56,
+    "fields": {
+      "name": "Gorkha Durbar",
+      "description": "Hilltop palace and birthplace of Prithvi Narayan Shah, unifier of modern Nepal.",
+      "location": 17,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 57,
+    "fields": {
+      "name": "Gorkhnath Temple",
+      "description": "Cave temple within the Gorkha Durbar complex, sacred to Hindus and Buddhists alike.",
+      "location": 17,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 58,
+    "fields": {
+      "name": "Manakamana Temple",
+      "description": "Hilltop temple reached by cable car, believed to grant the wishes of devotees.",
+      "location": 17,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 59,
+    "fields": {
+      "name": "Ilam Tea Gardens",
+      "description": "Rolling hillside tea estates, among Nepal's most famous tea-growing regions.",
+      "location": 18,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 60,
+    "fields": {
+      "name": "Antu Danda Viewpoint",
+      "description": "Ridge viewpoint known for sunrise views over the eastern hills.",
+      "location": 18,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 61,
+    "fields": {
+      "name": "Mai Pokhari",
+      "description": "A sacred lake and Ramsar wetland site surrounded by forest.",
+      "location": 18,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 62,
+    "fields": {
+      "name": "Dantakali Temple",
+      "description": "Hilltop temple overlooking Dharan, one of the region's major Shakti Peeths.",
+      "location": 19,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 63,
+    "fields": {
+      "name": "Buddha Subba Temple",
+      "description": "Historic temple popular with local pilgrims.",
+      "location": 19,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 64,
+    "fields": {
+      "name": "Bhedetar Viewpoint",
+      "description": "Nearby hill viewpoint on the road to Ilam, popular for its cool climate.",
+      "location": 19,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 65,
+    "fields": {
+      "name": "Rani Mirchaiya Wildlife Reserve area",
+      "description": "Wetland area near Biratnagar known for birdwatching.",
+      "location": 20,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 66,
+    "fields": {
+      "name": "Biratnagar Bazaar",
+      "description": "The city's main commercial and market district.",
+      "location": 20,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 67,
+    "fields": {
+      "name": "Janaki Mandir",
+      "description": "Ornate Hindu temple dedicated to Goddess Sita, a major Mithila pilgrimage site.",
+      "location": 21,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 68,
+    "fields": {
+      "name": "Ram Mandir, Janakpur",
+      "description": "Historic temple complex near Janaki Mandir.",
+      "location": 21,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 69,
+    "fields": {
+      "name": "Tinau Riverside",
+      "description": "Riverside area popular for walks and picnics.",
+      "location": 22,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 70,
+    "fields": {
+      "name": "Butwal Bazaar",
+      "description": "The city's main market and commercial hub.",
+      "location": 22,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 71,
+    "fields": {
+      "name": "Tansen Durbar",
+      "description": "Historic palace of the Palpa Kingdom in the hill town of Tansen.",
+      "location": 23,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 72,
+    "fields": {
+      "name": "Srinagar Hill",
+      "description": "Viewpoint above Tansen with views of the Himalayan range.",
+      "location": 23,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 73,
+    "fields": {
+      "name": "Rani Mahal",
+      "description": "A grand riverside palace known as the 'Taj Mahal of Nepal'.",
+      "location": 23,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 75,
+    "fields": {
+      "name": "Birendranagar",
+      "description": "The main town area of Surkhet district.",
+      "location": 24,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 76,
+    "fields": {
+      "name": "Ghodaghodi Lake",
+      "description": "A Ramsar wetland site known for its biodiversity and birdwatching.",
+      "location": 25,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 77,
+    "fields": {
+      "name": "Chandannath Temple, Jumla",
+      "description": "One of the district's most important Hindu temples.",
+      "location": 26,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.destination",
+    "pk": 78,
+    "fields": {
+      "name": "Jumla Bazaar",
+      "description": "The main market town, gateway to Rara Lake and the western Himalayas.",
+      "location": 26,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 1,
+    "fields": {
+      "name": "Banepa Khaja Ghar",
+      "cuisine": "Nepali",
+      "average_cost": 250,
+      "rating": 4.2,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 1,
+      "seed_average_cost": 250,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 2,
+    "fields": {
+      "name": "Newari Kitchen Banepa",
+      "cuisine": "Newari",
+      "average_cost": 350,
+      "rating": 4.5,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 1,
+      "seed_average_cost": 350,
+      "seed_rating": 4.5,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 3,
+    "fields": {
+      "name": "Highway Restaurant",
+      "cuisine": "Indian",
+      "average_cost": 300,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 1,
+      "seed_average_cost": 300,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 4,
+    "fields": {
+      "name": "Banepa Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 200,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 1,
+      "seed_average_cost": 200,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 5,
+    "fields": {
+      "name": "Local Bhatti",
+      "cuisine": "Nepali",
+      "average_cost": 180,
+      "rating": 3.8,
+      "price_range": 1,
+      "business_hours": "09:00-21:00",
+      "location": 1,
+      "seed_average_cost": 180,
+      "seed_rating": 3.8,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 6,
+    "fields": {
+      "name": "Dhulikhel Mountain View",
+      "cuisine": "Continental",
+      "average_cost": 600,
+      "rating": 4.6,
+      "price_range": 4,
+      "business_hours": "09:00-21:00",
+      "location": 2,
+      "seed_average_cost": 600,
+      "seed_rating": 4.6,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 7,
+    "fields": {
+      "name": "Himalayan Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 400,
+      "rating": 4.4,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 2,
+      "seed_average_cost": 400,
+      "seed_rating": 4.4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 8,
+    "fields": {
+      "name": "Dhulikhel Paradise",
+      "cuisine": "Multi-cuisine",
+      "average_cost": 500,
+      "rating": 4.3,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 2,
+      "seed_average_cost": 500,
+      "seed_rating": 4.3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 9,
+    "fields": {
+      "name": "View Point Restaurant",
+      "cuisine": "Chinese",
+      "average_cost": 450,
+      "rating": 4.2,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 2,
+      "seed_average_cost": 450,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 10,
+    "fields": {
+      "name": "Local Dine",
+      "cuisine": "Nepali",
+      "average_cost": 280,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 2,
+      "seed_average_cost": 280,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 11,
+    "fields": {
+      "name": "Panauti Heritage Kitchen",
+      "cuisine": "Newari",
+      "average_cost": 320,
+      "rating": 4.3,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 3,
+      "seed_average_cost": 320,
+      "seed_rating": 4.3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 12,
+    "fields": {
+      "name": "Traditional Bhoj",
+      "cuisine": "Nepali",
+      "average_cost": 220,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 3,
+      "seed_average_cost": 220,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 13,
+    "fields": {
+      "name": "River Side Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 250,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 3,
+      "seed_average_cost": 250,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 14,
+    "fields": {
+      "name": "Panauti Local Food",
+      "cuisine": "Nepali",
+      "average_cost": 180,
+      "rating": 3.9,
+      "price_range": 1,
+      "business_hours": "09:00-21:00",
+      "location": 3,
+      "seed_average_cost": 180,
+      "seed_rating": 3.9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 15,
+    "fields": {
+      "name": "Monastery Kitchen",
+      "cuisine": "Vegetarian",
+      "average_cost": 200,
+      "rating": 4.4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 4,
+      "seed_average_cost": 200,
+      "seed_rating": 4.4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 16,
+    "fields": {
+      "name": "Buddha View Restaurant",
+      "cuisine": "Tibetan",
+      "average_cost": 350,
+      "rating": 4.5,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 4,
+      "seed_average_cost": 350,
+      "seed_rating": 4.5,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 17,
+    "fields": {
+      "name": "Pilgrims Rest",
+      "cuisine": "Nepali",
+      "average_cost": 250,
+      "rating": 4.2,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 4,
+      "seed_average_cost": 250,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 18,
+    "fields": {
+      "name": "Mountain Lodge Dining",
+      "cuisine": "Continental",
+      "average_cost": 500,
+      "rating": 4.3,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 4,
+      "seed_average_cost": 500,
+      "seed_rating": 4.3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 19,
+    "fields": {
+      "name": "Highway Dhaba",
+      "cuisine": "Indian",
+      "average_cost": 200,
+      "rating": 3.8,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 5,
+      "seed_average_cost": 200,
+      "seed_rating": 3.8,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 20,
+    "fields": {
+      "name": "Khopasi Local",
+      "cuisine": "Nepali",
+      "average_cost": 150,
+      "rating": 3.7,
+      "price_range": 1,
+      "business_hours": "09:00-21:00",
+      "location": 5,
+      "seed_average_cost": 150,
+      "seed_rating": 3.7,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 21,
+    "fields": {
+      "name": "Truck Stop Cafe",
+      "cuisine": "Fast Food",
+      "average_cost": 180,
+      "rating": 3.6,
+      "price_range": 1,
+      "business_hours": "09:00-21:00",
+      "location": 5,
+      "seed_average_cost": 180,
+      "seed_rating": 3.6,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 22,
+    "fields": {
+      "name": "District Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 220,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 6,
+      "seed_average_cost": 220,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 23,
+    "fields": {
+      "name": "Kavre Traditional",
+      "cuisine": "Newari",
+      "average_cost": 280,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 6,
+      "seed_average_cost": 280,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 24,
+    "fields": {
+      "name": "Local Chulo",
+      "cuisine": "Nepali",
+      "average_cost": 160,
+      "rating": 3.8,
+      "price_range": 1,
+      "business_hours": "09:00-21:00",
+      "location": 6,
+      "seed_average_cost": 160,
+      "seed_rating": 3.8,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 27,
+    "fields": {
+      "name": "Lakeside Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 400,
+      "rating": 4.3,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 9,
+      "seed_average_cost": 400,
+      "seed_rating": 4.3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 28,
+    "fields": {
+      "name": "Pokhara Newari Ghar",
+      "cuisine": "Newari",
+      "average_cost": 450,
+      "rating": 4.4,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 9,
+      "seed_average_cost": 450,
+      "seed_rating": 4.4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 29,
+    "fields": {
+      "name": "Fishtail View Cafe",
+      "cuisine": "Continental",
+      "average_cost": 500,
+      "rating": 4.2,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 9,
+      "seed_average_cost": 500,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 30,
+    "fields": {
+      "name": "Annapurna Momo House",
+      "cuisine": "Nepali",
+      "average_cost": 250,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 9,
+      "seed_average_cost": 250,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 31,
+    "fields": {
+      "name": "Lakeside Bakery Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 300,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 9,
+      "seed_average_cost": 300,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 32,
+    "fields": {
+      "name": "Thamel Newari Bhansa Ghar",
+      "cuisine": "Newari",
+      "average_cost": 450,
+      "rating": 4.3,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 10,
+      "seed_average_cost": 450,
+      "seed_rating": 4.3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 33,
+    "fields": {
+      "name": "Durbar Square Momo House",
+      "cuisine": "Nepali",
+      "average_cost": 220,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 10,
+      "seed_average_cost": 220,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 34,
+    "fields": {
+      "name": "Kathmandu Rooftop Kitchen",
+      "cuisine": "Continental",
+      "average_cost": 650,
+      "rating": 4.4,
+      "price_range": 4,
+      "business_hours": "09:00-21:00",
+      "location": 10,
+      "seed_average_cost": 650,
+      "seed_rating": 4.4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 35,
+    "fields": {
+      "name": "Juju Dhau House",
+      "cuisine": "Newari",
+      "average_cost": 200,
+      "rating": 4.2,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 11,
+      "seed_average_cost": 200,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 36,
+    "fields": {
+      "name": "Bhaktapur Heritage Kitchen",
+      "cuisine": "Newari",
+      "average_cost": 400,
+      "rating": 4.4,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 11,
+      "seed_average_cost": 400,
+      "seed_rating": 4.4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 37,
+    "fields": {
+      "name": "Taumadhi Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 300,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 11,
+      "seed_average_cost": 300,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 38,
+    "fields": {
+      "name": "Patan Courtyard Kitchen",
+      "cuisine": "Newari",
+      "average_cost": 420,
+      "rating": 4.3,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 12,
+      "seed_average_cost": 420,
+      "seed_rating": 4.3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 39,
+    "fields": {
+      "name": "Ashoka Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 280,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 12,
+      "seed_average_cost": 280,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 40,
+    "fields": {
+      "name": "Nagarkot View Restaurant",
+      "cuisine": "Continental",
+      "average_cost": 550,
+      "rating": 4.3,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 13,
+      "seed_average_cost": 550,
+      "seed_rating": 4.3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 41,
+    "fields": {
+      "name": "Hillside Nepali Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 300,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 13,
+      "seed_average_cost": 300,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 42,
+    "fields": {
+      "name": "Jungle Safari Restaurant",
+      "cuisine": "Nepali",
+      "average_cost": 350,
+      "rating": 4.2,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 14,
+      "seed_average_cost": 350,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 43,
+    "fields": {
+      "name": "Tharu Kitchen",
+      "cuisine": "Tharu",
+      "average_cost": 300,
+      "rating": 4.3,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 14,
+      "seed_average_cost": 300,
+      "seed_rating": 4.3,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 44,
+    "fields": {
+      "name": "Riverside Cafe Chitwan",
+      "cuisine": "Continental",
+      "average_cost": 500,
+      "rating": 4.1,
+      "price_range": 3,
+      "business_hours": "09:00-21:00",
+      "location": 14,
+      "seed_average_cost": 500,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 45,
+    "fields": {
+      "name": "Lumbini Garden Restaurant",
+      "cuisine": "Nepali",
+      "average_cost": 300,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 15,
+      "seed_average_cost": 300,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 46,
+    "fields": {
+      "name": "Peace Pagoda Cafe",
+      "cuisine": "Vegetarian",
+      "average_cost": 250,
+      "rating": 4.2,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 15,
+      "seed_average_cost": 250,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 47,
+    "fields": {
+      "name": "Bandipur Old Bazaar Kitchen",
+      "cuisine": "Newari",
+      "average_cost": 350,
+      "rating": 4.4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 16,
+      "seed_average_cost": 350,
+      "seed_rating": 4.4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 48,
+    "fields": {
+      "name": "Ridge View Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 280,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 16,
+      "seed_average_cost": 280,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 49,
+    "fields": {
+      "name": "Durbar View Restaurant",
+      "cuisine": "Nepali",
+      "average_cost": 280,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 17,
+      "seed_average_cost": 280,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 50,
+    "fields": {
+      "name": "Manakamana Cable Car Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 250,
+      "rating": 3.9,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 17,
+      "seed_average_cost": 250,
+      "seed_rating": 3.9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 51,
+    "fields": {
+      "name": "Tea Garden Restaurant",
+      "cuisine": "Nepali",
+      "average_cost": 280,
+      "rating": 4.2,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 18,
+      "seed_average_cost": 280,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 52,
+    "fields": {
+      "name": "Antu View Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 250,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 18,
+      "seed_average_cost": 250,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 53,
+    "fields": {
+      "name": "Dharan Local Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 220,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 19,
+      "seed_average_cost": 220,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 54,
+    "fields": {
+      "name": "Bhedetar View Restaurant",
+      "cuisine": "Continental",
+      "average_cost": 350,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 19,
+      "seed_average_cost": 350,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 55,
+    "fields": {
+      "name": "Biratnagar Highway Dhaba",
+      "cuisine": "Indian",
+      "average_cost": 220,
+      "rating": 3.9,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 20,
+      "seed_average_cost": 220,
+      "seed_rating": 3.9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 56,
+    "fields": {
+      "name": "City Center Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 250,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 20,
+      "seed_average_cost": 250,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 57,
+    "fields": {
+      "name": "Mithila Bhojanalaya",
+      "cuisine": "Nepali",
+      "average_cost": 250,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 21,
+      "seed_average_cost": 250,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 58,
+    "fields": {
+      "name": "Janakpur Local Kitchen",
+      "cuisine": "Indian",
+      "average_cost": 280,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 21,
+      "seed_average_cost": 280,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 59,
+    "fields": {
+      "name": "Butwal Highway Restaurant",
+      "cuisine": "Indian",
+      "average_cost": 250,
+      "rating": 3.9,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 22,
+      "seed_average_cost": 250,
+      "seed_rating": 3.9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 60,
+    "fields": {
+      "name": "Tinau View Cafe",
+      "cuisine": "Cafe",
+      "average_cost": 220,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 22,
+      "seed_average_cost": 220,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 61,
+    "fields": {
+      "name": "Tansen Newari Kitchen",
+      "cuisine": "Newari",
+      "average_cost": 320,
+      "rating": 4.2,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 23,
+      "seed_average_cost": 320,
+      "seed_rating": 4.2,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 62,
+    "fields": {
+      "name": "Srinagar View Restaurant",
+      "cuisine": "Nepali",
+      "average_cost": 280,
+      "rating": 4.1,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 23,
+      "seed_average_cost": 280,
+      "seed_rating": 4.1,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 63,
+    "fields": {
+      "name": "Surkhet Valley Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 250,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 24,
+      "seed_average_cost": 250,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 64,
+    "fields": {
+      "name": "Dhangadhi Local Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 220,
+      "rating": 3.9,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 25,
+      "seed_average_cost": 220,
+      "seed_rating": 3.9,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  },
+  {
+    "model": "web_interface.placetoeat",
+    "pk": 65,
+    "fields": {
+      "name": "Jumla Highland Kitchen",
+      "cuisine": "Nepali",
+      "average_cost": 250,
+      "rating": 4,
+      "price_range": 2,
+      "business_hours": "09:00-21:00",
+      "location": 26,
+      "seed_average_cost": 250,
+      "seed_rating": 4,
+      "image": null,
+      "latitude": null,
+      "longitude": null,
+      "status": "approved",
+      "submitted_by": null
+    }
+  }
+]

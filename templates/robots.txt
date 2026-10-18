@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /accounts/dashboard/
+Disallow: /accounts/profile/
+Disallow: /accounts/preferences/
+Disallow: /saved-items/
+Disallow: /recent-views/
+Disallow: /admin/
+Disallow: /newsletter-subscribe/
+
+Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml

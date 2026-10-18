@@ -1,0 +1,52 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}Terms of Service - TravelEase{% endblock %}
+{% block meta_description %}Read the terms of service for using TravelEase to discover destinations and restaurants.{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 max-w-3xl">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">Terms of Service</h1>
+        <p class="text-gray-500 mb-10">Last updated: {% now "F j, Y" %}</p>
+
+        <div class="bg-white rounded-2xl shadow-lg p-8 space-y-8 text-gray-700 leading-relaxed">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-2">1. Using TravelEase</h2>
+                <p>TravelEase helps you discover travel destinations and restaurants. By creating an account or
+                   browsing the site, you agree to use it lawfully and not to misuse the service -- for example,
+                   by scraping content at scale, attempting to disrupt the site, or submitting false or abusive
+                   ratings and reviews.</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-2">2. Accounts</h2>
+                <p>You're responsible for keeping your account credentials secure and for the accuracy of the
+                   information you provide when you sign up. You must be old enough to legally use online
+                   services in your jurisdiction to create an account.</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-2">3. Ratings and content you submit</h2>
+                <p>When you rate a restaurant or save an item, that information is stored against your account.
+                   Ratings should reflect your genuine experience. We may remove content that's abusive,
+                   fraudulent, or otherwise violates these terms.</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-2">4. Third-party data</h2>
+                <p>Some location data displayed on TravelEase is sourced from
+                   <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" class="text-primary-600 hover:underline">OpenStreetMap</a>
+                   contributors under the Open Database License. We do our best to keep listings accurate, but we
+                   can't guarantee that every detail (hours, prices, availability) is current -- always confirm
+                   directly with a destination or restaurant before you visit.</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-2">5. Changes</h2>
+                <p>We may update these terms from time to time as the service evolves. Continuing to use
+                   TravelEase after a change means you accept the updated terms.</p>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-2">6. Questions</h2>
+                <p>If anything here is unclear, <a href="{% url 'web_interface:contact' %}" class="text-primary-600 hover:underline">get in touch</a>.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

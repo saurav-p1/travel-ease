@@ -1,0 +1,390 @@
+{% comment %}
+Reusable live location map.
+
+Drop this into any detail page that has a single point of interest with
+coordinates. It shows that point on a map, tracks the visitor's own GPS
+position in real time (via the browser's Geolocation API), draws a line
+between the two, and keeps a live "as the crow flies" distance updated.
+
+No API key is strictly required -- map tiles come from CARTO's free
+basemap tier (OpenStreetMap data, CARTO-hosted rendering; see
+CARTO_API_KEY below) and geolocation comes straight from the browser, so
+this keeps working as more destinations/restaurants (or any future
+point-of-interest type) get added with nothing to configure per-item.
+Without a CARTO_API_KEY, tiles still load and the map still works, just
+watermarked with "API KEY REQUIRED" (CARTO's own policy as of Aug 2026) --
+see the CARTO_API_KEY comment further down for how to remove that.
+
+Required context:
+    dest_lat   -- latitude of the place (Decimal/float/int)
+    dest_lng   -- longitude of the place
+    dest_name  -- display name of the place
+    map_id     -- short unique slug for this page, e.g. "destination" or
+                  "restaurant" (lets more than one map safely exist across
+                  the site without id clashes)
+
+Optional context:
+    pin_color  -- hex color for the destination pin, defaults to the
+                  site's primary blue. Pass the accent orange for
+                  restaurants, etc.
+{% endcomment %}
+{% if dest_lat is not None and dest_lng is not None %}
+<div class="bg-white rounded-2xl shadow-lg overflow-hidden lg:sticky lg:top-6">
+    <div id="live-map-{{ map_id }}"
+         class="w-full h-80 lg:h-[30rem] bg-gray-100"
+         role="application"
+         aria-label="Map showing {{ dest_name }} and your current location"></div>
+
+    <div class="p-4 border-t border-gray-100">
+        <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+                <p class="text-sm font-semibold text-gray-900 truncate">{{ dest_name }}</p>
+                <p id="live-map-status-{{ map_id }}" class="text-sm text-gray-500 mt-0.5">Locating you&hellip;</p>
+            </div>
+            <span class="shrink-0 inline-flex items-center gap-1.5 text-xs font-medium text-gray-400"
+                  id="live-map-gpswrap-{{ map_id }}">
+                <span id="live-map-dot-{{ map_id }}" class="w-2 h-2 rounded-full bg-gray-300"></span>
+                GPS
+            </span>
+        </div>
+
+        <div class="mt-3 flex gap-2">
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ dest_lat }},{{ dest_lng }}"
+               target="_blank" rel="noopener"
+               id="live-map-directions-{{ map_id }}"
+               class="flex-1 text-center px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold transition-colors">
+                Get directions
+            </a>
+            <button type="button" id="live-map-recenter-{{ map_id }}"
+                    class="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                Recenter
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    // Coordinates/name come straight from the server; keep the maps
+    // independent per-instance so a page could show more than one.
+    var destLat = {{ dest_lat }};
+    var destLng = {{ dest_lng }};
+    var destName = "{{ dest_name|escapejs }}";
+    var pinColor = "{{ pin_color|default:'#2563eb' }}";
+    var mapId = "{{ map_id }}";
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        var R = 6371;
+        var dLat = (lat2 - lat1) * Math.PI / 180;
+        var dLon = (lon2 - lon1) * Math.PI / 180;
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function formatDistance(km) {
+        if (km < 1) return Math.round(km * 1000) + ' m away';
+        return km.toFixed(km < 10 ? 1 : 0) + ' km away';
+    }
+
+    function setStatus(text) {
+        var el = document.getElementById('live-map-status-' + mapId);
+        if (el) el.textContent = text;
+    }
+
+    function setDot(state) {
+        // state: 'idle' | 'active' | 'approximate' | 'error'
+        var dot = document.getElementById('live-map-dot-' + mapId);
+        if (!dot) return;
+        dot.className = 'w-2 h-2 rounded-full ' + (
+            state === 'active' ? 'bg-green-500' :
+            state === 'approximate' ? 'bg-amber-400' :
+            state === 'error' ? 'bg-red-400' : 'bg-gray-300'
+        );
+    }
+
+    function boot() {
+        if (typeof L === 'undefined') return; // Leaflet failed to load (offline, blocked, etc.)
+
+        var mapEl = document.getElementById('live-map-' + mapId);
+        if (!mapEl) return;
+
+        var map = L.map(mapEl, { scrollWheelZoom: false }).setView([destLat, destLng], 14);
+
+        // CARTO's free basemap tier requires a key (as of Aug 2026) to
+        // avoid an "API KEY REQUIRED" watermark stamped across every
+        // tile -- free, no card required: https://carto.com/basemaps/apikey/.
+        // cartoApiKey comes from Django settings (CARTO_API_KEY in .env)
+        // via a context processor, so every page using this partial gets
+        // it with no per-view wiring. Left unset, this still renders a
+        // working map, just watermarked, rather than breaking anything.
+        var cartoApiKey = "{{ carto_api_key|default:''|escapejs }}";
+        var TILE_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+            + (cartoApiKey ? '?key=' + encodeURIComponent(cartoApiKey) : '');
+
+        L.tileLayer(TILE_URL, {
+            maxZoom: 20,
+            subdomains: 'abcd',
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>'
+        }).addTo(map);
+
+        var destIcon = L.divIcon({
+            className: '',
+            html: '<div style="width:18px;height:18px;border-radius:50% 50% 50% 0;background:' + pinColor + ';transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
+            iconSize: [18, 18],
+            iconAnchor: [9, 18]
+        });
+        L.marker([destLat, destLng], { icon: destIcon }).addTo(map).bindPopup(destName);
+
+        var userIcon = L.divIcon({
+            className: '',
+            html: '<div style="width:14px;height:14px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 0 0 2px rgba(59,130,246,.4)"></div>',
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+        });
+
+        var userMarker = null;
+        var accuracyCircle = null;
+        var routeLine = null;
+        var hasFitBounds = false;
+        var directionsLink = document.getElementById('live-map-directions-' + mapId);
+        var directionsBaseHref = directionsLink ? directionsLink.getAttribute('href') : null;
+
+        // How far off a position fix is allowed to be (in meters, per the
+        // browser's own pos.coords.accuracy) before we'll still trust it
+        // as a hard turn-by-turn origin. Real GPS hardware is typically
+        // accurate to single-digit/low-double-digit meters. Without GPS
+        // hardware (most desktops/laptops, and some phones indoors), the
+        // browser falls back to Wi-Fi/IP-based network location, which
+        // routinely reports "successfully" with accuracy of several
+        // kilometers -- sometimes tens of km. That fix used to be handed
+        // straight to Google Maps as an explicit `origin=lat,lng` with no
+        // check at all, so a low-accuracy network fix (resolving to
+        // wherever that Wi-Fi/IP database thinks the nearest access point
+        // or ISP node is -- e.g. a school across town) was presented as
+        // confidently as a real GPS lock, and silently became the actual
+        // navigation start point. Anything looser than this is treated as
+        // "approximate": still shown on the map, but never substituted in
+        // as the Directions origin -- the link stays destination-only so
+        // Google Maps prompts for (or uses its own, usually-better) start
+        // location instead of confidently routing from the wrong place.
+        var GPS_ACCURACY_THRESHOLD_M = 1500;
+
+        // Google's Directions URL API doesn't reliably fall back to the
+        // visitor's real device GPS on its own -- opened in a plain
+        // browser tab (not the Google Maps app), it often has no
+        // permission of its own yet and just drops a single destination
+        // pin with no route plotted at all, which is exactly the "Get
+        // directions opens Google Maps but shows no route" symptom this
+        // fixes. This page already has a live, high-accuracy GPS fix
+        // from watchPosition() below -- handing that straight to Google
+        // Maps as an explicit `origin` guarantees a real turn-by-turn
+        // route from the device's actual current position to this exact
+        // destination, with no second location prompt needed. Until a
+        // fix arrives (GPS denied, still loading, etc.) *or if the only
+        // fix available is too imprecise to trust as an origin*, the link
+        // stays destination-only, which still opens Google Maps and lets
+        // the visitor supply their own start point -- never Kathmandu,
+        // a Wi-Fi-database guess, or any other non-GPS-grade default.
+        function updateDirectionsLink(lat, lng) {
+            if (!directionsLink) return;
+            directionsLink.href = 'https://www.google.com/maps/dir/?api=1'
+                + '&origin=' + encodeURIComponent(lat + ',' + lng)
+                + '&destination=' + encodeURIComponent(destLat + ',' + destLng)
+                + '&travelmode=driving';
+        }
+
+        function resetDirectionsLink() {
+            if (!directionsLink || !directionsBaseHref) return;
+            directionsLink.setAttribute('href', directionsBaseHref);
+        }
+
+        function updateUserPosition(lat, lng, accuracy) {
+            var latLng = [lat, lng];
+            var isGpsGrade = typeof accuracy === 'number' && accuracy <= GPS_ACCURACY_THRESHOLD_M;
+
+            if (isGpsGrade) {
+                updateDirectionsLink(lat, lng);
+            } else {
+                // Don't let a kilometers-wide network location fix become
+                // the hard start point for turn-by-turn directions.
+                resetDirectionsLink();
+            }
+
+            if (!userMarker) {
+                userMarker = L.marker(latLng, { icon: userIcon, zIndexOffset: 1000 }).addTo(map).bindPopup('Your location');
+            } else {
+                userMarker.setLatLng(latLng);
+            }
+
+            if (accuracy) {
+                if (!accuracyCircle) {
+                    accuracyCircle = L.circle(latLng, { radius: accuracy, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.1, weight: 1 }).addTo(map);
+                } else {
+                    accuracyCircle.setLatLng(latLng);
+                    accuracyCircle.setRadius(accuracy);
+                }
+            }
+
+            if (!routeLine) {
+                routeLine = L.polyline([latLng, [destLat, destLng]], { color: pinColor, weight: 2, dashArray: '6 6', opacity: 0.8 }).addTo(map);
+            } else {
+                routeLine.setLatLngs([latLng, [destLat, destLng]]);
+            }
+
+            if (!hasFitBounds) {
+                map.fitBounds(L.latLngBounds([latLng, [destLat, destLng]]), { padding: [40, 40] });
+                hasFitBounds = true;
+            }
+
+            var km = haversineKm(lat, lng, destLat, destLng);
+            if (isGpsGrade) {
+                setStatus(formatDistance(km) + ' \u00b7 updates live');
+                setDot('active');
+            } else {
+                setStatus(formatDistance(km) + ' \u00b7 approximate location (accuracy \u00b1'
+                    + Math.round(accuracy / 1000) + ' km)');
+                setDot('approximate');
+            }
+        }
+
+        var watchId = null;
+
+        // Persist the best fix seen across page navigations. Every detail
+        // page boots a brand-new watchPosition() with no memory of any
+        // other page, so on a device with no real GPS chip -- where the
+        // browser is really resolving Wi-Fi/cell-tower/IP network location
+        // -- each page's *first* fix is an independent guess from whatever
+        // location service the OS/browser queries at that instant. Those
+        // guesses can easily land tens of km apart from one page to the
+        // next even though the device hasn't moved, which is exactly the
+        // "shows a different, random place every time I open a different
+        // destination" symptom: it isn't the site relocating you, it's a
+        // fresh, uncorrelated network-location guess every single time.
+        // Carrying the best (lowest-accuracy) recent fix forward gives
+        // every page the same starting point instead of re-rolling the
+        // dice, and a stale cached fix (>3 min old) is never trusted since
+        // the device really may have moved by then.
+        var FIX_CACHE_KEY = 'travelease_last_fix';
+        var FIX_CACHE_MAX_AGE_MS = 3 * 60 * 1000;
+
+        function readCachedFix() {
+            try {
+                var raw = localStorage.getItem(FIX_CACHE_KEY);
+                if (!raw) return null;
+                var fix = JSON.parse(raw);
+                if (!fix || typeof fix.lat !== 'number' || typeof fix.lng !== 'number') return null;
+                if (Date.now() - fix.ts > FIX_CACHE_MAX_AGE_MS) return null;
+                return fix;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function writeCachedFix(lat, lng, accuracy) {
+            try {
+                localStorage.setItem(FIX_CACHE_KEY, JSON.stringify({
+                    lat: lat, lng: lng, accuracy: accuracy, ts: Date.now()
+                }));
+            } catch (e) { /* storage unavailable/full -- fine, just skip caching */ }
+        }
+
+        // Best accuracy (meters) actually applied to the map so far this
+        // page view, and when that fix was accepted -- lets a fresh-but-
+        // worse fix arrive without visibly yanking the marker to a less
+        // trustworthy guess, UNLESS the on-screen fix has gone stale, in
+        // which case freshness must win over remembered accuracy (a signal
+        // genuinely can get worse if you move indoors, etc. -- the display
+        // must never get permanently stuck on an old "best" reading).
+        var bestAccuracySoFar = null;
+        var bestFixAcceptedAt = null;
+        var STALE_AFTER_MS = 2 * 60 * 1000;
+
+        function handleFix(lat, lng, accuracy, fromCache) {
+            var acc = typeof accuracy === 'number' ? accuracy : Infinity;
+            var currentIsStale = bestFixAcceptedAt !== null && (Date.now() - bestFixAcceptedAt) > STALE_AFTER_MS;
+
+            if (bestAccuracySoFar !== null && acc > bestAccuracySoFar && !fromCache && !currentIsStale) {
+                // Worse than what's already shown, and what's shown is
+                // still fresh -- do NOT let this replace either the map
+                // marker or the cache; a worse reading is never data worth
+                // keeping over a better one that's still valid.
+                return;
+            }
+
+            bestAccuracySoFar = acc;
+            bestFixAcceptedAt = Date.now();
+            updateUserPosition(lat, lng, accuracy);
+            // Persist every fix that actually gets accepted onto the map
+            // (including a stale-timeout override) -- but never a fix that
+            // was rejected above, so the cache can only ever hold a fix
+            // that was good enough to be trusted at the time.
+            if (!fromCache) writeCachedFix(lat, lng, accuracy);
+        }
+
+        function startWatching() {
+            if (!('geolocation' in navigator)) {
+                setStatus('Your browser doesn\u2019t support location sharing.');
+                setDot('error');
+                return;
+            }
+
+            var cached = readCachedFix();
+            if (cached) {
+                handleFix(cached.lat, cached.lng, cached.accuracy, true);
+            }
+
+            watchId = navigator.geolocation.watchPosition(
+                function (pos) {
+                    handleFix(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, false);
+                },
+                function (err) {
+                    // Only show an error state if we have nothing on the
+                    // map at all -- a cached fix is still better than a
+                    // scary error banner while a fresh one is denied/times out.
+                    if (!bestAccuracySoFar) {
+                        setDot('error');
+                        if (err.code === err.PERMISSION_DENIED) {
+                            setStatus('Location access denied \u2014 enable it to see live distance.');
+                        } else {
+                            setStatus('Couldn\u2019t get your location right now.');
+                        }
+                    }
+                },
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+            );
+        }
+
+        startWatching();
+
+        var recenterBtn = document.getElementById('live-map-recenter-' + mapId);
+        if (recenterBtn) {
+            recenterBtn.addEventListener('click', function () {
+                if (userMarker) {
+                    map.fitBounds(L.latLngBounds([userMarker.getLatLng(), [destLat, destLng]]), { padding: [40, 40] });
+                } else {
+                    map.setView([destLat, destLng], 14);
+                }
+            });
+        }
+
+        window.addEventListener('beforeunload', function () {
+            if (watchId !== null && 'geolocation' in navigator) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+})();
+</script>
+{% else %}
+<div class="bg-white rounded-2xl shadow-lg p-6 text-center text-sm text-gray-500 lg:sticky lg:top-6">
+    Map isn&rsquo;t available yet &mdash; this place doesn&rsquo;t have coordinates on file.
+</div>
+{% endif %}

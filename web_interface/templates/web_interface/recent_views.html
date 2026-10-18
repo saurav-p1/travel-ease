@@ -1,0 +1,146 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}Recent Views - TravelEase{% endblock %}
+{% block meta_description %}See the destinations and restaurants you've recently viewed on TravelEase.{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center mb-4">
+            <svg class="w-8 h-8 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <h1 class="text-3xl font-bold text-gray-800">Recent Views</h1>
+        </div>
+        <p class="text-gray-600">Places you've recently explored and discovered</p>
+    </div>
+
+    {% if recent_views %}
+        <!-- Statistics Bar -->
+        <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
+            <div class="flex flex-wrap items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ recent_views|length }}</div>
+                        <div class="text-sm text-gray-500">Recently Viewed</div>
+                    </div>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <form method="post" action="{% url 'web_interface:clear_recent_views' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-sm text-red-600 hover:text-red-700 transition duration-200" onclick="return confirm('Are you sure you want to clear all recent views?')">
+                            Clear All Recent Views
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Items Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in recent_views %}
+            <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div class="relative h-32 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                    {% if item.item_type == 'restaurant' %}
+                        <svg class="w-12 h-12 text-white opacity-70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"></path>
+                            <path d="M7 2v20"></path>
+                            <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"></path>
+                        </svg>
+                    {% else %}
+                        <svg class="w-12 h-12 text-white opacity-70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    {% endif %}
+
+                    <div class="absolute top-3 left-3">
+                        {% if item.item_type == 'restaurant' %}
+                            <span class="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">Restaurant</span>
+                        {% else %}
+                            <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">Attraction</span>
+                        {% endif %}
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <span class="bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-xs">
+                            {{ item.viewed_at|timesince }} ago
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg text-gray-800 mb-3 line-clamp-2">{{ item.item_title|default:"Untitled item" }}</h3>
+
+                    <div class="flex items-center justify-between">
+                        {% if item.item_url %}
+                            <a href="{{ item.item_url }}" class="text-blue-600 hover:text-blue-700 font-medium text-sm transition duration-200">
+                                View Details &rarr;
+                            </a>
+                        {% else %}
+                            <span></span>
+                        {% endif %}
+
+                        <div class="flex items-center space-x-1">
+                            <!-- Save/Unsave Button -->
+                            <form method="post" action="{% url 'web_interface:toggle_save_item' %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="item_type" value="{{ item.item_type }}">
+                                <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                                <input type="hidden" name="next" value="{% url 'web_interface:recent_views' %}">
+                                {% if item.is_saved %}
+                                    <button type="submit" class="p-2 rounded-full hover:bg-gray-100 transition duration-200" title="Saved -- click to remove">
+                                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                        </svg>
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="p-2 rounded-full hover:bg-gray-100 transition duration-200" title="Save item">
+                                        <svg class="w-5 h-5 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                        </svg>
+                                    </button>
+                                {% endif %}
+                            </form>
+
+                            <!-- Remove from Recent Views -->
+                            <form method="post" action="{% url 'web_interface:remove_recent_view' %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ item.id }}">
+                                <button type="submit" class="p-2 rounded-full hover:bg-gray-100 transition duration-200" title="Remove from recent views" onclick="return confirm('Remove this item from recent views?')">
+                                    <svg class="w-5 h-5 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-16">
+            <div class="max-w-md mx-auto">
+                <svg class="mx-auto h-24 w-24 text-gray-400 mb-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">No Recent Views Yet</h3>
+                <p class="text-gray-600 mb-8">Start exploring destinations and restaurants to see your recent activity here.</p>
+                <div class="space-y-3 sm:space-y-0 sm:space-x-3 sm:flex sm:justify-center">
+                    <a href="{% url 'web_interface:search_travel_options' %}?type=destination" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition duration-200">
+                        Explore Places
+                    </a>
+                    <a href="{% url 'web_interface:search_travel_options' %}?type=place_to_eat" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition duration-200">
+                        Find Restaurants
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

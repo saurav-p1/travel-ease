@@ -1,0 +1,752 @@
+{% load static site_extras %}
+
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Discover amazing travel destinations and restaurants worldwide with TravelEase{% endblock %}">
+    <meta name="theme-color" content="#3b82f6">
+
+    <!-- Open Graph / Facebook.
+         FIXED (found during audit): og:image/og:url (and twitter:image
+         below) used to be built with plain static-file/URL template tags,
+         which only ever produce a relative path like
+         "/static/images/og-image.jpg". Open Graph/Twitter Card tags are
+         read by an external crawler (Facebook, Twitter, WhatsApp,
+         iMessage, Slack...) with no browser to resolve a relative path
+         against -- the spec requires an absolute URL, so link shares of
+         this site had silently had no preview image, and always pointed
+         back at the homepage regardless of which page was actually
+         shared. Each raw path/URL below is its own overridable block
+         (og_image_path / page_path), always piped through the
+         absolute_uri filter (web_interface/templatetags/site_extras.py)
+         so a child template only has to override the raw value -- see
+         travel_detail.html/restaurant_detail.html, which override these
+         with the specific destination/restaurant's own photo and URL.
+
+         NOTE: do not describe Django template tag syntax inside an HTML
+         comment using the actual curly-brace-percent delimiters -- the
+         template engine scans the raw file text for that delimiter
+         sequence with no concept of an HTML comment, so writing it out
+         (even just to explain the rule, as this comment itself used to)
+         is parsed as a real tag and hard-crashes every page that extends
+         this template. Refer to tags by name only ("the static tag", "the
+         url tag") in comments like this one. -->
+    <meta property="og:type" content="website">
+    {% block og_meta %}
+        <meta property="og:title" content="{% block og_title %}TravelEase - Your Global Adventure Starts Here{% endblock %}">
+        <meta property="og:description" content="{% block og_description %}Discover amazing travel destinations and restaurants worldwide{% endblock %}">
+        <meta property="og:image" content="{% filter absolute_uri:request %}{% block og_image_path %}{% static 'images/og-image.jpg' %}{% endblock %}{% endfilter %}">
+        <meta property="og:image:alt" content="{% block og_image_alt %}TravelEase global adventure{% endblock %}">
+        <meta property="og:url" content="{% filter absolute_uri:request %}{% block page_path %}{% url 'web_interface:home' %}{% endblock %}{% endfilter %}">
+    {% endblock %}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    {% block twitter_meta %}
+        <meta name="twitter:title" content="{% block twitter_title %}TravelEase{% endblock %}">
+        <meta name="twitter:description" content="{% block twitter_description %}Explore destinations and restaurants worldwide{% endblock %}">
+        <!-- Same image as og:image above -- a separate block (rather than
+             reusing og_image_path) because a Django block name can only
+             be rendered once per template; a page that overrides one
+             must override this one too (see travel_detail.html/
+             restaurant_detail.html, which do both together). -->
+        <meta name="twitter:image" content="{% filter absolute_uri:request %}{% block twitter_image_path %}{% static 'images/og-image.jpg' %}{% endblock %}{% endfilter %}">
+    {% endblock %}
+
+    <title>{% block title %}TravelEase - Your Global Adventure Starts Here{% endblock %}</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="{% static 'css/critical.css' %}" as="style">
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/critical.css' %}">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS: pre-compiled at build time (npm run build:css), not the
+         CDN JIT script -- see static/css/tailwind.css and tailwind.config.js
+         at the project root for the theme (primary/accent colors, Inter
+         font, fade-in/slide-up/pulse-slow animations) this replaces. -->
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+
+    <!-- Critical CSS -->
+    <style>
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .hero-gradient { background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)); }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .glass-effect { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .loading-spinner { animation: spin 1s linear infinite; }
+        .safe-area-pb { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+        /* The mobile bottom nav is `fixed`, so it is out of normal flow and
+           reserves no space -- the last ~70px of every page sat underneath
+           it on mobile (the homepage's "Use My Location" button was clipped
+           in half). Nothing compensated for that anywhere. Reserve the nav's
+           height plus the device safe-area inset below the footer, and drop
+           it again at the `md` breakpoint where the bottom nav is hidden and
+           the left sidebar takes over. */
+        @media (max-width: 767.98px) {
+            body { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)); }
+        }
+
+        @media (max-width: 768px) {
+            .touch-target { min-height: 44px; min-width: 44px; }
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            html { scroll-behavior: smooth; }
+        }
+
+        /* FOUND DURING AUDIT: was written as ".focus-visible:focus", a
+           custom class combined with :focus -- but nothing anywhere ever
+           applies a class named "focus-visible" to any element, so this
+           rule never matched anything, ever. What was clearly intended
+           is the native :focus-visible pseudo-class (no leading dot,
+           applies automatically): browsers use it to show a focus ring
+           for keyboard/programmatic focus but suppress it for mouse
+           clicks, which is exactly the "don't show a focus ring on
+           click, do show one on Tab" behavior this rule's own outline
+           styling implies it was going for. */
+        :focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+        /* FOUND DURING AUDIT: these two classes were only ever defined
+           inside search_results.html's own <style> block, but
+           accounts/profile.html (which extends this base.html, not
+           search_results.html) also uses them for its "Destination" /
+           "Restaurant" saved-item badges. Since this base layout never
+           defined them, those badges rendered as invisible white text on
+           no background at all on the Profile page. Moved here so every
+           page that extends this base actually gets the color -- one
+           consistent meaning (blue = destination, warm accent =
+           restaurant) everywhere it's used, not just on search results. */
+        .category-destination { background: #2563eb; }
+        .category-restaurant { background: #c2740f; }
+
+        /* Promoted from search_results.html for the same reason as
+           .category-destination/.category-restaurant just above: the
+           detail pages (travel_detail.html, restaurant_detail.html) show
+           nothing at all -- not even this on-brand placeholder -- when a
+           destination/restaurant has no `image` yet (the common case for
+           the seed data and for OSM-sourced restaurants, which are
+           deliberately never auto-matched to a stock photo -- see
+           backfill_images.py's docstring for why). Every page that
+           extends this base now gets the same subtle topographic/place-
+           setting pattern instead of a blank gap, whether or not it also
+           defines its own copy locally. */
+        .image-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        .image-placeholder.destination {
+            background-color: #eef2ff;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 11px, rgba(37,99,235,0.08) 11px, rgba(37,99,235,0.08) 12px),
+                repeating-linear-gradient(90deg, transparent, transparent 11px, rgba(37,99,235,0.08) 11px, rgba(37,99,235,0.08) 12px);
+        }
+        .image-placeholder.restaurant {
+            background-color: #fdf3e7;
+            background-image: radial-gradient(circle at 50% 50%, rgba(194,116,15,0.10) 0, rgba(194,116,15,0.10) 2px, transparent 2px);
+            background-size: 18px 18px;
+        }
+
+        /* FOUND DURING AUDIT: identical to a <style> block that was
+           copy-pasted, byte-for-byte, into 5 separate auth templates
+           (login, password_reset, password_reset_done,
+           password_reset_confirm, password_reset_complete). Consolidated
+           here once; each of those five now just uses these shared
+           classes instead of redefining them. */
+        .auth-container {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            min-height: calc(100vh - 80px);
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Prevent horizontal scroll on mobile: base.html previously had no
+           overflow-x guard (signup.html, a separate standalone page, had
+           one but this shared layout -- used by nearly every page -- did
+           not). max-width: 100vw plus overflow-x: hidden on both html and
+           body is the standard belt-and-suspenders fix for any element
+           that would otherwise push slightly past the viewport edge on
+           small screens. */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body { background-color: #1f2937; color: #e5e7eb; }
+            .bg-white { background-color: #374151; }
+            .bg-gray-50 { background-color: #1f2937; }
+            .text-gray-600 { color: #d1d5db; }
+            .text-gray-900 { color: #f3f4f6; }
+            .bg-primary-600 { background-color: #1d4ed8; }
+            .border-gray-200 { border-color: #4b5563; }
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-gray-50 font-sans antialiased">
+    <!-- Skip to main content -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary-600 text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white z-50 flex items-center justify-center hidden">
+        <div class="text-center">
+            <div class="loading-spinner w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full mb-4"></div>
+            <p class="text-gray-600">Loading amazing destinations...</p>
+        </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Desktop Sidebar Navigation -->
+        <nav class="hidden md:flex flex-col w-20 lg:w-24 bg-gradient-to-b from-primary-900 via-primary-800 to-primary-700 text-white shadow-2xl fixed h-screen z-40" aria-label="Main navigation">
+            <div class="flex flex-col items-center py-6 space-y-8">
+                <a href="{% url 'web_interface:home' %}" class="flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl hover:bg-white/20 transition-colors duration-200" aria-label="TravelEase Home">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </a>
+                <div class="space-y-4">
+                    <a href="{% url 'web_interface:home' %}" class="nav-item flex flex-col items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-200 {% if request.resolver_match.url_name == 'home' %}bg-white/20 ring-2 ring-white/30{% endif %}" aria-label="Home">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        <span class="text-xs hidden lg:block">Home</span>
+                    </a>
+                    <a href="{% url 'web_interface:search_travel_options' %}?type=destination" class="nav-item flex flex-col items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-200 {% if 'search' in request.resolver_match.url_name and request.GET.type != 'place_to_eat' %}bg-white/20 ring-2 ring-white/30{% endif %}" aria-label="Explore destinations">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <span class="text-xs hidden lg:block">Explore</span>
+                    </a>
+                    <a href="{% url 'web_interface:search_travel_options' %}?type=place_to_eat" class="nav-item flex flex-col items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-200 {% if 'search' in request.resolver_match.url_name and request.GET.type == 'place_to_eat' %}bg-white/20 ring-2 ring-white/30{% endif %}" aria-label="Find restaurants">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
+                            <path d="M7 2v20"/>
+                            <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/>
+                        </svg>
+                        <span class="text-xs hidden lg:block">Food</span>
+                    </a>
+                    <a href="{% url 'web_interface:saved_items' %}" class="nav-item flex flex-col items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-200 {% if request.resolver_match.url_name == 'saved_items' %}bg-white/20 ring-2 ring-white/30{% endif %}" aria-label="Saved items">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span class="text-xs hidden lg:block">Saved</span>
+                    </a>
+                    <a href="{% url 'web_interface:recent_views' %}" class="nav-item flex flex-col items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-200 {% if request.resolver_match.url_name == 'recent_views' %}bg-white/20 ring-2 ring-white/30{% endif %}" aria-label="Recent views">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span class="text-xs hidden lg:block">Recent</span>
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'web_interface:submit_place' %}" class="nav-item flex flex-col items-center p-3 rounded-xl hover:bg-white/10 transition-all duration-200 {% if request.resolver_match.url_name == 'submit_place' %}bg-white/20 ring-2 ring-white/30{% endif %}" aria-label="Add a place">
+                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span class="text-xs hidden lg:block">Add</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 md:ml-20 lg:ml-24">
+            <!-- Top Navigation -->
+            <header class="sticky top-0 bg-white/95 backdrop-blur-sm shadow-lg border-b z-30">
+                <div class="container mx-auto px-4 py-4">
+                    <div class="flex items-center justify-between">
+                        <!-- Mobile Logo & Menu -->
+                        <div class="flex items-center space-x-4">
+                            <button id="mobile-menu-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 touch-target" aria-label="Toggle mobile menu" aria-expanded="false">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                            <a href="{% url 'web_interface:home' %}" class="flex items-center space-x-2 group">
+                                <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center group-hover:shadow-lg transition-shadow">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                                <span class="text-xl font-bold text-primary-700">TravelEase</span>
+                            </a>
+                        </div>
+
+                        <!-- Right Side Actions -->
+                        <div class="flex items-center space-x-3">
+                            <button id="search-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 touch-target" aria-label="Toggle search" aria-expanded="false">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                </svg>
+                            </button>
+                            {% if user.is_authenticated %}
+                                <div class="relative">
+                                    <button id="user-menu-toggle" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500" aria-label="User menu" aria-expanded="false">
+                                        <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                            {{ user.first_name|first|upper|default:"U" }}
+                                        </div>
+                                        <span class="hidden sm:block text-sm font-medium text-gray-700">{{ user.first_name|default:"User" }}</span>
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                    <!-- User Dropdown Menu -->
+                                    <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
+                                        <a href="{% url 'accounts:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                        <a href="{% url 'accounts:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</a>
+                                        <a href="{% url 'accounts:preferences' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                        <div class="border-t border-gray-100"></div>
+                                        <!-- FOUND DURING AUDIT: this was a plain <a href> GET
+                                             link to logout, while profile.html already (correctly)
+                                             uses a POST form with a CSRF token for the exact same
+                                             action. A GET logout link isn't covered by Django's CSRF
+                                             protection, so any third-party page could silently log a
+                                             visitor out just by loading this URL (e.g. via an <img>
+                                             tag) -- low-severity (it can only log someone out, not
+                                             take over the account), but there's no reason for this
+                                             one nav item to be the odd one out. -->
+                                        <form method="post" action="{% url 'accounts:logout' %}" class="block">
+                                            {% csrf_token %}
+                                            <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign Out</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="flex items-center space-x-2">
+                                    <a href="{% url 'accounts:login' %}" class="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors">Login</a>
+                                    <a href="{% url 'signup:signup' %}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl touch-target">Get Started</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Search Bar -->
+                <div id="mobile-search" class="hidden md:hidden px-4 pb-4">
+                    <form method="get" action="{% url 'web_interface:search_travel_options' %}" class="relative">
+                        <input type="text" name="search" placeholder="Search destinations..." aria-label="Search destinations" class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <button type="submit" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" aria-label="Search">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </header>
+
+            <!-- Mobile Navigation Menu
+
+                 The closed state used to be `top-20` + `-translate-y-full`
+                 alone. translateY(-100%) moves the panel up by its OWN
+                 height, so its bottom edge always lands back at the `top-20`
+                 offset (80px) no matter how tall it is -- i.e. the panel's
+                 last item sat squarely on top of the header, and because
+                 this nav is z-40 against the header's z-30 it painted OVER
+                 it. The visible symptom was the header disappearing on
+                 mobile with a stray "Settings" row in its place. Hiding it
+                 properly needs `invisible` (toggled with the transform in
+                 JS below), not just the transform. -->
+            <nav id="mobile-nav" class="md:hidden fixed inset-x-0 top-20 bg-white shadow-xl border-t z-20 transform -translate-y-full invisible transition-transform duration-300" aria-label="Mobile navigation">
+                <div class="px-4 py-6 space-y-4">
+                    <a href="{% url 'web_interface:home' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 touch-target">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        <span class="font-medium">Home</span>
+                    </a>
+                    <a href="{% url 'web_interface:search_travel_options' %}?type=destination" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 touch-target">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <span class="font-medium">Explore</span>
+                    </a>
+                    <a href="{% url 'web_interface:search_travel_options' %}?type=place_to_eat" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 touch-target">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
+                            <path d="M7 2v20"/>
+                            <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/>
+                        </svg>
+                        <span class="font-medium">Food</span>
+                    </a>
+                    <a href="{% url 'web_interface:saved_items' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 touch-target">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span class="font-medium">Saved Items</span>
+                    </a>
+                    <a href="{% url 'web_interface:recent_views' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 touch-target">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span class="font-medium">Recent</span>
+                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'web_interface:submit_place' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 touch-target">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span class="font-medium">Add a Place</span>
+                        </a>
+                        <a href="{% url 'accounts:preferences' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 touch-target">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span class="font-medium">Settings</span>
+                        </a>
+                    {% endif %}
+                    {% if not user.is_authenticated %}
+                        <div class="border-t pt-4 mt-4">
+                            <a href="{% url 'accounts:login' %}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 touch-target">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                </svg>
+                                <span class="font-medium">Login</span>
+                            </a>
+                            <a href="{% url 'signup:signup' %}" class="flex items-center space-x-3 p-3 rounded-lg bg-primary-50 text-primary-700 touch-target">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                </svg>
+                                <span class="font-medium">Get Started</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </nav>
+
+            <!-- Alert Messages -->
+            {% if messages %}
+                <div class="container mx-auto px-4 pt-4">
+                    {% for message in messages %}
+                        <div class="alert-message bg-gradient-to-r {% if message.tags == 'success' %}from-green-50 to-emerald-50 border-green-200 text-green-800{% elif message.tags == 'error' %}from-red-50 to-rose-50 border-red-200 text-red-800{% elif message.tags == 'warning' %}from-yellow-50 to-amber-50 border-yellow-200 text-yellow-800{% else %}from-blue-50 to-indigo-50 border-blue-200 text-blue-800{% endif %} border rounded-lg p-4 mb-4 animate-slide-up" role="alert">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    {% if message.tags == 'success' %}
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    {% elif message.tags == 'error' %}
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    {% else %}
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    {% endif %}
+                                </svg>
+                                <span class="font-medium">{{ message }}</span>
+                                <button class="ml-auto pl-3" onclick="this.parentElement.parentElement.remove()" aria-label="Close message">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Main Content -->
+            <main id="main-content" class="min-h-screen">
+                {% block content %}
+                    <div class="container mx-auto px-4 py-8">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-6">Welcome to TravelEase</h1>
+                        <p class="text-gray-600 text-lg">Your global adventure starts here. Discover amazing places to visit and delicious places to eat.</p>
+                    </div>
+                {% endblock %}
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-white border-t">
+                <div class="container mx-auto px-4 py-12">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                        <div>
+                            <a href="{% url 'web_interface:home' %}" class="flex items-center space-x-2 mb-4 w-fit">
+                                <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                                <span class="text-lg font-bold text-primary-700">TravelEase</span>
+                            </a>
+                            <p class="text-gray-600 mb-4">Discover amazing destinations and culinary experiences around the world.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-4">Explore</h3>
+                            <ul class="space-y-3 text-sm">
+                                <li><a href="{% url 'web_interface:search_travel_options' %}" class="text-gray-600 hover:text-primary-600 transition-colors">All Destinations</a></li>
+                                <li><a href="{% url 'web_interface:search_travel_options' %}?type=destination" class="text-gray-600 hover:text-primary-600 transition-colors">Places to Visit</a></li>
+                                <li><a href="{% url 'web_interface:search_travel_options' %}?type=place_to_eat" class="text-gray-600 hover:text-primary-600 transition-colors">Restaurants</a></li>
+                                <li><a href="{% url 'web_interface:home' %}#trending" class="text-gray-600 hover:text-primary-600 transition-colors">Popular Destinations</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-4">Account</h3>
+                            <ul class="space-y-3 text-sm">
+                                {% if user.is_authenticated %}
+                                    <li><a href="{% url 'web_interface:saved_items' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Saved Items</a></li>
+                                    <li><a href="{% url 'web_interface:recent_views' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Recent Views</a></li>
+                                    <li><a href="{% url 'accounts:profile' %}" class="text-gray-600 hover:text-primary-600 transition-colors">My Profile</a></li>
+                                    <li><a href="{% url 'accounts:preferences' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Settings</a></li>
+                                    <li><a href="{% url 'accounts:dashboard' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Dashboard</a></li>
+                                {% else %}
+                                    <li><a href="{% url 'accounts:login' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Login</a></li>
+                                    <li><a href="{% url 'signup:signup' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Create Account</a></li>
+                                    <li><a href="{% url 'web_interface:home' %}#features" class="text-gray-600 hover:text-primary-600 transition-colors">Why Join?</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-4">Support</h3>
+                            <ul class="space-y-3 text-sm">
+                                <li><a href="{% url 'web_interface:contact' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Help Center</a></li>
+                                <li><a href="{% url 'web_interface:contact' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Contact Us</a></li>
+                                <li><a href="{% url 'web_interface:contact' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Report a Safety Concern</a></li>
+                                <li><a href="{% url 'web_interface:terms' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Terms</a></li>
+                                <li><a href="{% url 'web_interface:privacy' %}" class="text-gray-600 hover:text-primary-600 transition-colors">Privacy</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="border-t pt-8 mb-8">
+                        <div class="max-w-md">
+                            <h3 class="font-semibold text-gray-900 mb-2">Stay Updated</h3>
+                            <p class="text-gray-600 text-sm mb-4">Get travel tips and exclusive offers.</p>
+                            <form method="post" action="{% url 'web_interface:newsletter_subscribe' %}" class="flex space-x-2">
+                                {% csrf_token %}
+                                <input type="email" name="email" placeholder="Enter your email" aria-label="Email address for newsletter" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm">
+                                <button type="submit" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">Subscribe</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="border-t pt-8 flex flex-col md:flex-row justify-between items-center">
+                        <p class="text-sm text-gray-500 mb-4 md:mb-0">© {% now "Y" %} TravelEase. All rights reserved.</p>
+                        <div class="flex items-center space-x-6 text-sm">
+                            <a href="{% url 'web_interface:privacy' %}" class="text-gray-500 hover:text-gray-700 transition-colors">Privacy</a>
+                            <a href="{% url 'web_interface:terms' %}" class="text-gray-500 hover:text-gray-700 transition-colors">Terms</a>
+                            <a href="{% url 'web_interface:privacy' %}#cookies" class="text-gray-500 hover:text-gray-700 transition-colors">Cookies</a>
+                        </div>
+                    </div>
+                    <div class="pt-4 text-center md:text-left">
+                        <p class="text-xs text-gray-400">
+                            Location data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" class="underline hover:text-gray-600">OpenStreetMap</a> contributors, available under the
+                            <a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener" class="underline hover:text-gray-600">Open Database License</a>.
+                        </p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-40 safe-area-pb">
+        <div class="flex justify-around items-center py-2">
+            <a href="{% url 'web_interface:home' %}" class="flex flex-col items-center py-2 px-2 touch-target {% if request.resolver_match.url_name == 'home' %}text-primary-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span class="text-xs">Home</span>
+            </a>
+            <a href="{% url 'web_interface:search_travel_options' %}?type=destination" class="flex flex-col items-center py-2 px-2 touch-target {% if 'search' in request.resolver_match.url_name and request.GET.type != 'place_to_eat' %}text-primary-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <span class="text-xs">Explore</span>
+            </a>
+            <a href="{% url 'web_interface:search_travel_options' %}?type=place_to_eat" class="flex flex-col items-center py-2 px-2 touch-target {% if 'search' in request.resolver_match.url_name and request.GET.type == 'place_to_eat' %}text-primary-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
+                    <path d="M7 2v20"/>
+                    <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/>
+                </svg>
+                <span class="text-xs">Food</span>
+            </a>
+            <a href="{% url 'web_interface:submit_place' %}" class="flex flex-col items-center py-2 px-2 touch-target {% if request.resolver_match.url_name == 'submit_place' %}text-primary-600{% else %}text-gray-600{% endif %}" aria-label="Add a place">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span class="text-xs">Add</span>
+            </a>
+            <a href="{% url 'web_interface:saved_items' %}" class="flex flex-col items-center py-2 px-2 touch-target {% if request.resolver_match.url_name == 'saved_items' %}text-primary-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span class="text-xs">Saved</span>
+            </a>
+            <a href="{% url 'web_interface:recent_views' %}" class="flex flex-col items-center py-2 px-2 touch-target {% if request.resolver_match.url_name == 'recent_views' %}text-primary-600{% else %}text-gray-600{% endif %}">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span class="text-xs">Recent</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileNav = document.getElementById('mobile-nav');
+        const searchToggle = document.getElementById('search-toggle');
+        const mobileSearch = document.getElementById('mobile-search');
+        const userMenuToggle = document.getElementById('user-menu-toggle');
+        const userMenu = document.getElementById('user-menu');
+
+        if (mobileMenuToggle && mobileNav) {
+            mobileMenuToggle.addEventListener('click', () => {
+                // `invisible` has to come off BEFORE the transform so the
+                // open animation is actually seen, and go back on only
+                // after the close transition finishes -- otherwise the
+                // panel vanishes instantly instead of sliding away.
+                const isClosed = mobileNav.classList.contains('-translate-y-full');
+                if (isClosed) {
+                    mobileNav.classList.remove('invisible');
+                    // Force a reflow so the browser registers the visible
+                    // state before the transform changes in the same tick.
+                    void mobileNav.offsetWidth;
+                    mobileNav.classList.remove('-translate-y-full');
+                } else {
+                    mobileNav.classList.add('-translate-y-full');
+                    mobileNav.addEventListener('transitionend', function hide(e) {
+                        if (e.propertyName !== 'transform') return;
+                        mobileNav.classList.add('invisible');
+                        mobileNav.removeEventListener('transitionend', hide);
+                    });
+                }
+                mobileMenuToggle.setAttribute('aria-expanded', String(isClosed));
+            });
+        }
+
+        if (searchToggle && mobileSearch) {
+            searchToggle.addEventListener('click', () => {
+                const isExpanded = mobileSearch.classList.toggle('hidden');
+                searchToggle.setAttribute('aria-expanded', !isExpanded);
+                if (!isExpanded) {
+                    mobileSearch.querySelector('input').focus();
+                }
+            });
+        }
+
+        if (userMenuToggle && userMenu) {
+            userMenuToggle.addEventListener('click', () => {
+                const isExpanded = userMenu.classList.toggle('hidden');
+                userMenuToggle.setAttribute('aria-expanded', !isExpanded);
+            });
+
+            // Close user menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!userMenuToggle.contains(e.target) && !userMenu.contains(e.target)) {
+                    userMenu.classList.add('hidden');
+                    userMenuToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        // Auto-hide alerts after 5 seconds
+        document.querySelectorAll('.alert-message').forEach(alert => {
+            setTimeout(() => {
+                alert.style.animation = 'fadeOut 0.5s ease-out forwards';
+                setTimeout(() => alert.remove(), 500);
+            }, 5000);
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Loading states for forms.
+        // FOUND DURING AUDIT: this unconditionally did
+        // `submitBtn.textContent = 'Loading...'` on every submit button on
+        // the page. That's fine for buttons that already have text (e.g.
+        // "Save Contact Info"), but several buttons elsewhere in the app
+        // are icon-only (the save/unsave heart and the remove-from-recent-
+        // views trash icon in search_results.html/saved_items.html/
+        // recent_views.html) -- setting .textContent on those replaces
+        // their SVG child with the literal string "Loading...", visibly
+        // breaking the icon for the moment before the page navigates away.
+        // Only swap in text for buttons that actually start with text.
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function() {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const hasText = submitBtn.textContent.trim().length > 0;
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-75');
+                    if (hasText) {
+                        const originalText = submitBtn.textContent;
+                        submitBtn.textContent = 'Loading...';
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-75');
+                            submitBtn.textContent = originalText;
+                        }, 10000);
+                    } else {
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-75');
+                        }, 10000);
+                    }
+                }
+            });
+        });
+
+        // Add loading animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.card-hover').forEach(el => observer.observe(el));
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

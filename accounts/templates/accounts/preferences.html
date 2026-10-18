@@ -1,0 +1,118 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}TravelEase - Settings{% endblock %}
+{% block meta_description %}Manage your TravelEase account preferences.{% endblock %}
+
+{% block content %}
+<section class="hero-gradient text-white py-12">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold">Settings</h1>
+        <p class="text-white/90 mt-1">Manage how TravelEase works for you.</p>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 max-w-2xl space-y-8">
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Contact Information</h2>
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <input type="hidden" name="form_name" value="contact_info">
+
+                {% if contact_form.non_field_errors %}
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                        {{ contact_form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ contact_form.first_name.id_for_label }}" class="block font-medium mb-2 text-gray-700">First name</label>
+                        {{ contact_form.first_name }}
+                        {% if contact_form.first_name.errors %}<p class="text-red-600 text-sm mt-1">{{ contact_form.first_name.errors|join:", " }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ contact_form.last_name.id_for_label }}" class="block font-medium mb-2 text-gray-700">Last name</label>
+                        {{ contact_form.last_name }}
+                        {% if contact_form.last_name.errors %}<p class="text-red-600 text-sm mt-1">{{ contact_form.last_name.errors|join:", " }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-2 text-gray-700">Phone number</label>
+                    <div class="flex gap-2">
+                        <div class="w-32 flex-shrink-0">{{ contact_form.country_code }}</div>
+                        <div class="flex-1">{{ contact_form.phone_number }}</div>
+                    </div>
+                    {% if contact_form.country_code.errors %}<p class="text-red-600 text-sm mt-1">{{ contact_form.country_code.errors|join:", " }}</p>{% endif %}
+                    {% if contact_form.phone_number.errors %}<p class="text-red-600 text-sm mt-1">{{ contact_form.phone_number.errors|join:", " }}</p>{% endif %}
+                </div>
+
+                <button type="submit"
+                    class="w-full text-white py-3 rounded-xl font-semibold bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl">
+                    Save Contact Info
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">Travel Preferences</h2>
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                <input type="hidden" name="form_name" value="preferences">
+
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div>
+                    <label for="{{ form.travel_style.id_for_label }}" class="block font-medium mb-2 text-gray-700">Travel style</label>
+                    {{ form.travel_style }}
+                    {% if form.travel_style.errors %}<p class="text-red-600 text-sm mt-1">{{ form.travel_style.errors|join:", " }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.preferred_currency.id_for_label }}" class="block font-medium mb-2 text-gray-700">Preferred currency code</label>
+                    {{ form.preferred_currency }}
+                    <p class="text-xs text-gray-500 mt-1">{{ form.fields.preferred_currency.help_text }}</p>
+                    {% if form.preferred_currency.errors %}<p class="text-red-600 text-sm mt-1">{{ form.preferred_currency.errors|join:", " }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.preferred_language.id_for_label }}" class="block font-medium mb-2 text-gray-700">Preferred language code</label>
+                    {{ form.preferred_language }}
+                    <p class="text-xs text-gray-500 mt-1">{{ form.fields.preferred_language.help_text }}</p>
+                    {% if form.preferred_language.errors %}<p class="text-red-600 text-sm mt-1">{{ form.preferred_language.errors|join:", " }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.profile_visibility.id_for_label }}" class="block font-medium mb-2 text-gray-700">Public profile visibility</label>
+                    {{ form.profile_visibility }}
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ form.fields.profile_visibility.help_text }}
+                        {% if form.instance.profile_visibility == 'public' %}
+                            Your profile is currently visible at
+                            <a href="{% url 'accounts:public_profile' user.id %}" class="text-primary-600 hover:underline">this link</a>.
+                        {% endif %}
+                    </p>
+                    {% if form.profile_visibility.errors %}<p class="text-red-600 text-sm mt-1">{{ form.profile_visibility.errors|join:", " }}</p>{% endif %}
+                </div>
+
+                <div class="flex items-center gap-3">
+                    {{ form.marketing_emails }}
+                    <label for="{{ form.marketing_emails.id_for_label }}" class="text-sm text-gray-700">
+                        Send me travel tips, deals, and destination inspiration via email
+                    </label>
+                </div>
+
+                <button type="submit"
+                    class="w-full text-white py-3 rounded-xl font-semibold bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl">
+                    Save Settings
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}My Saved Items - TravelEase{% endblock %}
+{% block meta_description %}Manage your saved travel destinations and restaurants.{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="bg-gradient-to-r from-primary-600 via-primary-700 to-purple-700 text-white py-16">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <nav class="mb-6" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2 text-sm text-white/80">
+                    <li><a href="{% url 'web_interface:home' %}" class="hover:text-white transition-colors">Home</a></li>
+                    <li>/</li>
+                    <li class="text-white font-medium">Saved Items</li>
+                </ol>
+            </nav>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div class="flex items-center mb-6 md:mb-0">
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold">My Saved Items</h1>
+                        <p class="text-white/90 mt-2">Your collection of favorite destinations and restaurants</p>
+                    </div>
+                </div>
+
+                <a href="{% url 'web_interface:search_travel_options' %}"
+                   class="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white px-6 py-2 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Find More</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        {% if saved_items %}
+            <!-- Stats -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ saved_items|length }}</div>
+                    <div class="text-sm text-gray-600 font-medium">Total Saved</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ destination_count }}</div>
+                    <div class="text-sm text-gray-600 font-medium">Places to Visit</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ restaurant_count }}</div>
+                    <div class="text-sm text-gray-600 font-medium">Restaurants</div>
+                </div>
+            </div>
+
+            <!-- Saved Items Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for item in saved_items %}
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                        <div class="relative w-full h-40">
+                        {% if item.item_image %}
+                        <img src="{{ item.item_image }}" alt="{{ item.item_title }}"
+                             class="w-full h-40 object-cover" loading="lazy"
+                             onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling){this.nextElementSibling.style.display='flex';}">
+                        {% endif %}
+                        <div class="w-full h-40 image-placeholder {% if item.item_type == 'restaurant' %}restaurant{% else %}destination{% endif %}"
+                             {% if item.item_image %}style="display:none;"{% endif %}>
+                            <div class="text-center">
+                                <div class="text-2xl">{% if item.item_type == 'restaurant' %}🍽️{% else %}📍{% endif %}</div>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-3">
+                                {% if item.item_type == 'restaurant' %}
+                                    <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">Restaurant</span>
+                                {% else %}
+                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">Destination</span>
+                                {% endif %}
+                                <span class="text-xs text-gray-400">Saved {{ item.saved_at|timesince }} ago</span>
+                            </div>
+
+                            <h3 class="text-lg font-bold text-gray-900 mb-3 line-clamp-2">
+                                {% if item.item_url %}
+                                    <a href="{{ item.item_url }}" class="hover:text-primary-600 transition-colors duration-200">
+                                        {{ item.item_title|default:"Untitled item" }}
+                                    </a>
+                                {% else %}
+                                    {{ item.item_title|default:"Untitled item" }}
+                                {% endif %}
+                            </h3>
+
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                {% if item.item_url %}
+                                    <a href="{{ item.item_url }}"
+                                       class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700">
+                                        View Details
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </a>
+                                {% else %}
+                                    <span></span>
+                                {% endif %}
+
+                                <form method="post" action="{% url 'web_interface:toggle_save_item' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="item_type" value="{{ item.item_type }}">
+                                    <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                                    <input type="hidden" name="next" value="{% url 'web_interface:saved_items' %}">
+                                    <button type="submit"
+                                            class="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-all duration-200"
+                                            title="Remove from saved items">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-20">
+                <div class="max-w-md mx-auto">
+                    <div class="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">No Saved Items Yet</h3>
+                    <p class="text-gray-600 mb-8">Start exploring and save your favorite places to visit and restaurants to try!</p>
+                    <a href="{% url 'web_interface:search_travel_options' %}"
+                       class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+                        Start Exploring
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

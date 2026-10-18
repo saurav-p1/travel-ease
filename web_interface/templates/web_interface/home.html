@@ -1,0 +1,525 @@
+{% extends 'web_interface/base.html' %}
+{% load static %}
+
+{% block title %}TravelEase - Discover Your Next Adventure{% endblock %}
+{% block meta_description %}Explore breathtaking destinations, discover amazing restaurants, and plan your perfect trip with TravelEase.{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Reuses the same gradient as base.html's .hero-gradient utility --
+       kept as its own class name for clarity within this template. */
+    .hero-bg {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+    }
+    /* Same glass-panel treatment as the Explore page's search filter card
+       (web_interface/search_results.html .search-filters), so the two
+       search bars actually look like the same product. */
+    .search-filters {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .place-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .place-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    /* Same icon-on-gradient treatment as the Explore results grid
+       (web_interface/search_results.html .image-placeholder) instead of
+       pointing at a `destination.image` / `restaurant.image` field that
+       doesn't exist on either model -- every card used to silently fall
+       back to one identical stock photo regardless of place. */
+    .place-placeholder {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-bg min-h-screen flex items-center">
+    <div class="container mx-auto px-4 text-center text-white">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+            Discover Your Next <span class="text-yellow-400">Adventure</span>
+        </h1>
+        <p class="text-xl mb-10 max-w-3xl mx-auto text-white/90">
+            Explore breathtaking destinations and discover amazing restaurants across Nepal.
+        </p>
+
+        <!-- Search Form -- submits a plain GET straight to the same
+             search_travel_options view/URL as the Explore page's own
+             filter form, using the exact same field names, option
+             values, and JS behavior (see search_results.html) so the
+             two pages can never drift out of sync with each other again. -->
+        <div class="animate-float max-w-4xl mx-auto mb-10">
+            <form id="hero-search-form" action="{% url 'web_interface:search_travel_options' %}" method="get" class="search-filters rounded-2xl p-6 shadow-2xl text-left">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="md:col-span-2 relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                        </div>
+                        <input type="text"
+                               name="search"
+                               placeholder="Where do you want to explore?"
+                               aria-label="Search destinations and restaurants"
+                               value="{{ search_term|default_if_none:'' }}"
+                               class="w-full pl-12 pr-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 backdrop-blur-sm">
+                    </div>
+                    <button type="submit"
+                            class="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-semibold rounded-xl px-6 py-3 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        Discover
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t border-white/20">
+                    <!-- Same name/values/labels as search_results.html's type filter -->
+                    <select name="type" aria-label="Filter by type" class="bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/50 appearance-none">
+                        <option value="" class="text-gray-900">All Types</option>
+                        <option value="destination" class="text-gray-900" {% if result_type == 'destination' %}selected{% endif %}>Destinations</option>
+                        <option value="place_to_eat" class="text-gray-900" {% if result_type == 'place_to_eat' %}selected{% endif %}>Restaurants</option>
+                    </select>
+
+                    <!-- Same location picker as search_results.html -->
+                    <select name="location_id" aria-label="Search around a specific place" class="bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/50 appearance-none">
+                        <option value="" class="text-gray-900">Near Kathmandu (default)</option>
+                        {% for location in all_locations %}
+                            <option value="{{ location.id }}" class="text-gray-900" {% if selected_location and selected_location.id == location.id %}selected{% endif %}>{{ location.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <!-- Same distance filter as search_results.html -->
+                    <select name="radius" aria-label="Filter by distance" class="bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/50 appearance-none">
+                        {% for value, label in radius_choices %}
+                            <option value="{{ value|default:'' }}" class="text-gray-900" {% if radius_km == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Only relevant for restaurants/all -- these don't apply to
+                     destinations (no rating or hours on that model), so they're
+                     hidden rather than silently accepted and ignored server-side
+                     -- same reasoning as search_results.html's identical guard. -->
+                {% if result_type != 'destination' %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <div class="flex items-center gap-3 min-w-0 bg-white/20 border border-white/30 rounded-lg px-4 py-2">
+                        <label for="min-rating-slider" class="text-white text-sm whitespace-nowrap">Min. rating:</label>
+                        <input type="range"
+                               id="min-rating-slider"
+                               name="min_rating"
+                               min="0"
+                               max="5"
+                               step="0.5"
+                               value="{{ request.GET.min_rating|default:'0' }}"
+                               aria-describedby="rating-display"
+                               class="flex-1 min-w-0 accent-yellow-400">
+                        <span id="rating-display" class="text-white text-sm w-10 shrink-0 text-right">Any</span>
+                    </div>
+
+                    <label class="flex items-center gap-2 bg-white/20 border border-white/30 rounded-lg px-4 py-2 text-white text-sm cursor-pointer">
+                        <input type="checkbox" name="open_now" value="true" {% if request.GET.open_now == 'true' %}checked{% endif %}
+                               class="h-4 w-4 rounded border-white/40 text-yellow-500 focus:ring-yellow-400">
+                        Open now (restaurants only)
+                    </label>
+                </div>
+                {% endif %}
+
+                <p class="text-xs text-white/70 pt-2">
+                    Adjust any filters above, then press <strong>Discover</strong> to apply them.
+                </p>
+
+                <!-- "Use My Location": same behavior as search_results.html's
+                     button -- real browser GPS, takes priority over the
+                     picker above once active (see resolve_search_origin()). -->
+                <div class="flex gap-2 pt-4">
+                    <button type="button" id="hero-use-my-location-btn"
+                            aria-pressed="{% if request.GET.latitude %}true{% else %}false{% endif %}"
+                            class="flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2 border transition-colors
+                                   {% if request.GET.latitude %}bg-white text-primary-700 border-white{% else %}bg-white/20 text-white border-white/30 hover:bg-white/30{% endif %}">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+                        </svg>
+                        <span>{% if request.GET.latitude %}Using My Location{% else %}Use My Location{% endif %}</span>
+                    </button>
+                    <input type="hidden" name="latitude" id="hero-precise-latitude" value="{{ request.GET.latitude|default:'' }}">
+                    <input type="hidden" name="longitude" id="hero-precise-longitude" value="{{ request.GET.longitude|default:'' }}">
+                    <input type="hidden" name="location_accuracy" id="hero-precise-accuracy" value="{{ request.GET.location_accuracy|default:'' }}">
+                </div>
+            </form>
+
+            {% if error_message %}
+                <div class="mt-4 p-4 bg-red-500/30 rounded-lg text-white">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'web_interface:search_travel_options' %}?type=destination"
+               class="bg-white/10 border border-white/20 px-6 py-3 rounded-lg text-white hover:bg-white/20 transition">
+                Places to Visit
+            </a>
+            <a href="{% url 'web_interface:search_travel_options' %}?type=place_to_eat"
+               class="bg-white/10 border border-white/20 px-6 py-3 rounded-lg text-white hover:bg-white/20 transition">
+                Restaurants
+            </a>
+            <a href="#trending"
+               class="bg-white/10 border border-white/20 px-6 py-3 rounded-lg text-white hover:bg-white/20 transition">
+                Trending
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Trending Destinations Section -->
+<section id="trending" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Popular Destinations</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Discover the world's most loved destinations.
+            </p>
+        </div>
+
+        {% if trending_destinations %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for destination in trending_destinations|slice:":6" %}
+                <div class="place-card bg-white rounded-2xl shadow-lg overflow-hidden group">
+                    <a href="{% url 'web_interface:travel_detail' destination.id %}" class="block relative h-48 overflow-hidden">
+                        {% if destination.image %}
+                            <img src="{{ destination.image }}" alt="{{ destination.name }}"
+                                 class="w-full h-full object-cover" loading="lazy"
+                                 onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling){this.nextElementSibling.style.display='flex';}">
+                            <div class="w-full h-full place-placeholder items-center justify-center" style="display:none;">
+                                <div class="text-center text-gray-500">
+                                    <div class="text-4xl mb-2">📍</div>
+                                    <div class="text-sm">Destination</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="w-full h-full place-placeholder flex items-center justify-center">
+                                <div class="text-center text-gray-500">
+                                    <div class="text-4xl mb-2">📍</div>
+                                    <div class="text-sm">Destination</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="absolute bottom-3 left-3">
+                            <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">📍 Destination</span>
+                        </div>
+                    </a>
+                    <div class="p-5">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{{ destination.name }}</h3>
+                        <p class="text-gray-500 text-sm mb-2">{{ destination.location.name|default:"Nepal" }}</p>
+                        {% if destination.description %}
+                            <p class="text-gray-600 text-sm line-clamp-2 mb-4">{{ destination.description|truncatewords:12 }}</p>
+                        {% endif %}
+                        <a href="{% url 'web_interface:travel_detail' destination.id %}"
+                           class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700">
+                            Explore Now
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="text-center text-gray-500">No destinations yet -- check back soon.</p>
+        {% endif %}
+
+        <div class="text-center mt-8">
+            <a href="{% url 'web_interface:search_travel_options' %}?type=destination"
+               class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Explore All Destinations
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Restaurants Section -- the view has always fetched this
+     data (see web_interface.views.home's `restaurants` context var) but
+     no template ever rendered it, so the homepage only ever showcased
+     half of what the site actually offers. -->
+<section id="featured-restaurants" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Featured Restaurants</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Hungry? Here's where locals and travelers love to eat.
+            </p>
+        </div>
+
+        {% if restaurants %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for restaurant in restaurants|slice:":6" %}
+                <div class="place-card bg-white rounded-2xl shadow-lg overflow-hidden group border border-gray-100">
+                    <a href="{% url 'web_interface:restaurant_detail' restaurant.id %}" class="block relative h-48 overflow-hidden">
+                        {% if restaurant.image %}
+                            <img src="{{ restaurant.image }}" alt="{{ restaurant.name }}"
+                                 class="w-full h-full object-cover" loading="lazy"
+                                 onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling){this.nextElementSibling.style.display='flex';}">
+                            <div class="w-full h-full place-placeholder items-center justify-center" style="display:none;">
+                                <div class="text-center text-gray-500">
+                                    <div class="text-4xl mb-2">🍽️</div>
+                                    <div class="text-sm">Restaurant</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="w-full h-full place-placeholder flex items-center justify-center">
+                                <div class="text-center text-gray-500">
+                                    <div class="text-4xl mb-2">🍽️</div>
+                                    <div class="text-sm">Restaurant</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if restaurant.rating is not None %}
+                            <div class="absolute top-3 right-3">
+                                <span class="bg-yellow-400 text-gray-900 px-2 py-1 rounded-full text-sm font-bold">★ {{ restaurant.rating }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="absolute bottom-3 left-3">
+                            <span class="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">🍽️ {{ restaurant.cuisine|default:"Restaurant" }}</span>
+                        </div>
+                    </a>
+                    <div class="p-5">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{{ restaurant.name }}</h3>
+                        <p class="text-gray-500 text-sm mb-4">{{ restaurant.location.name|default:"Nepal" }}</p>
+                        <a href="{% url 'web_interface:restaurant_detail' restaurant.id %}"
+                           class="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-700">
+                            View Details
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="text-center text-gray-500">No restaurants yet -- check back soon.</p>
+        {% endif %}
+
+        <div class="text-center mt-8">
+            <a href="{% url 'web_interface:search_travel_options' %}?type=place_to_eat"
+               class="inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+                Explore All Restaurants
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Why Choose TravelEase?</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">Plan your perfect adventure with ease.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Smart Discovery</h3>
+                <p class="text-gray-600">Find places to visit and eat, filtered by distance, rating, and open hours.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Save & Organize</h3>
+                <p class="text-gray-600">Keep track of your favorite places.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-orange-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Local Insights</h3>
+                <p class="text-gray-600">Authentic recommendations from locals.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-16 bg-blue-600 text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-4">Ready for Your Next Adventure?</h2>
+        <p class="text-xl mb-8 max-w-2xl mx-auto">Join travelers who trust TravelEase to discover amazing destinations.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'web_interface:search_travel_options' %}"
+               class="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition">
+                Start Exploring
+            </a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'signup:signup' %}"
+                   class="inline-flex items-center px-6 py-3 border-2 border-white rounded-lg hover:bg-white hover:text-blue-600 transition">
+                    Create Free Account
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Rating slider. Same selector strategy as search_results.html's
+    // identical block (getElementById, not a name="" attribute selector)
+    // -- kept in sync so the two pages' JS is byte-for-byte the same
+    // pattern, not two different ways of finding the same element.
+    const ratingSlider = document.getElementById('min-rating-slider');
+    const ratingDisplay = document.getElementById('rating-display');
+    if (ratingSlider && ratingDisplay) {
+        const updateRatingDisplay = () => {
+            const value = parseFloat(ratingSlider.value);
+            ratingDisplay.textContent = (!value || value === 0) ? 'Any' : value.toFixed(1) + '+';
+        };
+        updateRatingDisplay();  // reflect a value carried over in the URL, not just future moves
+        ratingSlider.addEventListener('input', updateRatingDisplay);
+    }
+
+    // Same location-picker / GPS conflict handling as search_results.html:
+    // only one of them should set the search origin at a time (GPS always
+    // wins in resolve_search_origin() if both are present). Clear the
+    // other control before submitting so a stale value from one doesn't
+    // silently override a change just made to the other.
+    document.querySelector('select[name="location_id"]')?.addEventListener('change', function () {
+        const lat = document.getElementById('hero-precise-latitude');
+        const lon = document.getElementById('hero-precise-longitude');
+        if (lat) lat.value = '';
+        if (lon) lon.value = '';
+        this.form.submit();
+    });
+
+    // "Use my location" -- GPS is now the default search origin unless
+    // you've explicitly picked a place from the dropdown above (which
+    // always wins once selected -- see resolve_search_origin() and the
+    // location_id-picker handler above). On first load each browser
+    // session (and only if no place is selected and no coordinates are
+    // already in the URL), this silently attempts a GPS fix and, if
+    // granted, reloads the search with it applied -- exactly like
+    // clicking the button below yourself. Denied/unavailable just keeps
+    // the existing Kathmandu-area default; it never prompts again this
+    // session (sessionStorage flag below) and never touches an explicit
+    // place selection.
+    function requestPreciseLocation(onSuccess, onError) {
+        if (!navigator.geolocation) {
+            onError({ code: 0, message: 'unsupported' });
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+            // FOUND DURING AUDIT: this call previously passed no options at
+            // all, which defaults to enableHighAccuracy: false -- browsers
+            // commonly interpret that as "prefer a fast, low-power Wi-Fi/
+            // cell-tower/IP fix over the actual GPS chip", which is exactly
+            // the kind of imprecise result ("use my location" doesn't find
+            // you / is off by miles) this is meant to prevent.
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000,
+        });
+    }
+
+    document.getElementById('hero-use-my-location-btn')?.addEventListener('click', function () {
+        const btn = this;
+        const isActive = btn.getAttribute('aria-pressed') === 'true';
+
+        if (isActive) {
+            document.getElementById('hero-precise-latitude').value = '';
+            document.getElementById('hero-precise-longitude').value = '';
+            document.getElementById('hero-precise-accuracy').value = '';
+            btn.closest('form').submit();
+            return;
+        }
+
+        const showLocationMessage = (msg) => {
+            let banner = document.getElementById('hero-location-error-banner');
+            if (!banner) {
+                banner = document.createElement('p');
+                banner.id = 'hero-location-error-banner';
+                banner.className = 'text-xs text-yellow-100 bg-red-500/30 rounded-lg px-3 py-2 mt-2';
+                btn.closest('form').appendChild(banner);
+            }
+            banner.textContent = msg;
+        };
+
+        if (!navigator.geolocation) {
+            showLocationMessage('Your browser does not support location detection.');
+            return;
+        }
+        btn.disabled = true;
+        requestPreciseLocation(
+            function (position) {
+                document.getElementById('hero-precise-latitude').value = position.coords.latitude;
+                document.getElementById('hero-precise-longitude').value = position.coords.longitude;
+                document.getElementById('hero-precise-accuracy').value = position.coords.accuracy;
+                const picker = document.querySelector('select[name="location_id"]');
+                if (picker) picker.value = '';
+                btn.closest('form').submit();
+            },
+            function () {
+                btn.disabled = false;
+                showLocationMessage('Could not get your location. Please check your browser/OS location permissions and try again.');
+            }
+        );
+    });
+
+    (function autoUseGpsByDefault() {
+        const btn = document.getElementById('hero-use-my-location-btn');
+        const form = btn ? btn.closest('form') : null;
+        if (!btn || !form) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const hasExplicitCoords = !!params.get('latitude');
+        const hasExplicitPlace = !!params.get('location_id');
+        const alreadyAttemptedThisSession = sessionStorage.getItem('travelease_geo_attempted') === '1';
+
+        if (hasExplicitCoords || hasExplicitPlace || alreadyAttemptedThisSession || !navigator.geolocation) {
+            return;
+        }
+        sessionStorage.setItem('travelease_geo_attempted', '1');
+
+        requestPreciseLocation(
+            function (position) {
+                document.getElementById('hero-precise-latitude').value = position.coords.latitude;
+                document.getElementById('hero-precise-longitude').value = position.coords.longitude;
+                document.getElementById('hero-precise-accuracy').value = position.coords.accuracy;
+                form.submit();
+            },
+            function () {
+                // Denied/unavailable/timed out -- keep the Kathmandu-area
+                // default silently. Not an error state worth interrupting a
+                // first-time visitor over; the button below still lets them
+                // retry explicitly any time (e.g. after granting permission).
+            }
+        );
+    })();
+</script>
+{% endblock %}

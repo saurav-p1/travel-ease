@@ -1,0 +1,62 @@
+{% extends 'web_interface/base.html' %}
+
+{% block title %}Dashboard - TravelEase{% endblock %}
+{% block meta_description %}Your TravelEase dashboard: recent views, saved items, and account activity at a glance.{% endblock %}
+
+{% block content %}
+<section class="hero-gradient text-white py-12">
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl font-bold">Welcome back, {{ user.get_full_name|default:user.email }}!</h1>
+        <p class="text-white/90 mt-2">Here's a quick look at your TravelEase activity.</p>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-3xl font-bold text-gray-900 mb-1">{{ recent_views_count }}</div>
+                <div class="text-sm text-gray-600 font-medium">Recent Views</div>
+                <a href="{% url 'web_interface:recent_views' %}" class="text-primary-600 text-sm font-medium hover:underline mt-2 inline-block">View all</a>
+            </div>
+            <div class="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-3xl font-bold text-gray-900 mb-1">{{ saved_items_count }}</div>
+                <div class="text-sm text-gray-600 font-medium">Saved Items</div>
+                <a href="{% url 'web_interface:saved_items' %}" class="text-primary-600 text-sm font-medium hover:underline mt-2 inline-block">View all</a>
+            </div>
+            <div class="bg-white rounded-2xl shadow-lg p-6 text-center">
+                <div class="text-3xl font-bold text-gray-900 mb-1">{{ recent_activity|length }}</div>
+                <div class="text-sm text-gray-600 font-medium">Recent Logins</div>
+                <a href="{% url 'accounts:profile' %}" class="text-primary-600 text-sm font-medium hover:underline mt-2 inline-block">View profile</a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+            {% if recent_activity %}
+                <ul class="divide-y divide-gray-100">
+                    {% for entry in recent_activity %}
+                        <li class="py-3 flex items-center justify-between">
+                            <span class="capitalize text-gray-700">{{ entry.action }}</span>
+                            <span class="text-sm text-gray-500">{{ entry.timestamp|timesince }} ago</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-600">No recent activity yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="mt-8 flex flex-wrap gap-4">
+            <a href="{% url 'web_interface:search_travel_options' %}"
+               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200">
+                Explore Destinations
+            </a>
+            <a href="{% url 'accounts:profile' %}"
+               class="inline-flex items-center px-6 py-3 border-2 border-primary-600 text-primary-600 font-semibold rounded-xl hover:bg-primary-50 transition-colors duration-200">
+                View Profile
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

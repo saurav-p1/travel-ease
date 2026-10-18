@@ -1,0 +1,12 @@
+Django==5.2.17
+django-allauth==65.19.2
+django-widget-tweaks==1.5.1
+PyJWT==2.14.0
+python-dotenv==1.2.3
+requests==2.33.1
+
+# Production deployment (Render) -- not needed for local dev, harmless if unused
+gunicorn==23.0.0
+whitenoise==6.12.0
+dj-database-url==3.1.2
+psycopg2-binary==2.9.13

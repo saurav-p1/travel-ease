@@ -1,0 +1,34 @@
+# Environment / secrets
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+*.log
+media/
+
+# sync_osm_data's per-run scratch output -- regenerated every run,
+# never meant to be committed (see that command's docstring)
+data_templates/_osm_sync_cache/
+
+# Node / frontend tooling
+node_modules/
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

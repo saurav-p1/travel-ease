@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelEase - Signup Success</title>
+    <!-- Tailwind CSS: pre-compiled at build time, shared with every other
+         page instead of this page loading its own separate CDN copy. -->
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+    <div class="text-center p-6 bg-white rounded-2xl shadow-2xl">
+        <h1 class="text-4xl font-bold text-green-600 mb-4">🎉</h1>
+        <h2 class="text-3xl font-bold mb-2">Welcome to TravelEase!</h2>
+        <p class="text-lg text-gray-600 mb-6">Your adventure begins now!</p>
+        <a href="{% url 'web_interface:home' %}" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">Start Exploring</a>
+    </div>
+</body>
+</html>

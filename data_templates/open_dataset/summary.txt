@@ -1,0 +1,47 @@
+Per-town coverage (staged, not yet imported)
+
+Town                dest   img   rest   img   notes
+Bandipur              77     1     69     0   widened radius
+Banepa                33     1     94     0   
+Bhaktapur            168     4    289     0   
+Biratnagar           153     0    125     0   widened radius
+Butwal               115     1     37     0   widened radius
+Chitwan              219     2    192     2   widened radius
+Dhangadhi             73     1     35     0   widened radius
+Dharan               250     0    108     0   widened radius
+Dhulikhel            300     0     58     0   widened radius
+Gorkha               154     4     60     0   widened radius
+Ilam                 219    14    190     2   widened radius
+Janakpur             260     1     15     0   widened radius, BELOW 20 (dest 260, rest 15)
+Jumla                 83     1     10     0   widened radius, BELOW 20 (dest 83, rest 10)
+Kathmandu            300    15    300     0   
+Kavre                300     0     17     0   widened radius, BELOW 20 (dest 300, rest 17)
+Khopasi              148     0      9     0   BELOW 20 (dest 148, rest 9)
+Lumbini              124     3    300     0   widened radius
+Nagarkot              35     1     24     0   
+Namobuddha           300     1     78     0   widened radius
+Palpa (Tansen)       164     3     38     0   widened radius
+Panauti              300     0      9     0   widened radius, BELOW 20 (dest 300, rest 9)
+Patan                300     4    300     0   
+Pokhara              300     6    300     1   
+Surkhet              194     0     62     0   widened radius
+
+Totals: 4569 destinations, 2719 restaurants; target was 300 per town.
+HTTP: 276 requests, 167 retries, 63 throttled responses.
+
+Restaurant photos: 5 of 2719 have one.
+This number is normally low and that is not a bug. OpenStreetMap is map data;
+only a small minority of venues carry an image= or wikimedia_commons= tag, and a
+photo is only attached here when the venue itself asserts that link. The three
+ways to raise it, all legitimate: tag the photo on the venue in OSM, let the
+owner or a user upload one through the submit-a-place form, or leave it blank.
+Attaching a stock or name-matched photo is what put an Ncell logo on a market.
+
+Towns below the 20/20 minimum: Janakpur, Jumla, Kavre, Khopasi, Panauti
+These are reported, not padded. OpenStreetMap genuinely has fewer mapped
+venues in some of these places. Options, in order of honesty:
+  1. Raise --expand-radius-km so the town covers its real travel catchment.
+  2. Add the missing real places to OpenStreetMap yourself, then re-harvest
+     (they are real businesses you can see; this is the intended route).
+  3. Accept the lower count and let the UI show what exists.
+Inventing rows to reach 20 is what produced the current broken data.
